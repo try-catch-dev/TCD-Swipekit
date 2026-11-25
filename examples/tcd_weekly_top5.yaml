@@ -1,0 +1,115 @@
+topic: "5 Repo GitHub Paling Trending Minggu Ini"
+language: id
+aspect_ratio: "3:4"
+part: 1
+
+theme:
+  preset: tcd-neon-lime
+  watermark: "@trycatchdev"
+  watermark_position: bottom-right
+
+cover:
+  mode: gradient
+  gradient_from: "#D4F93A"
+  gradient_to: "#38BDF8"
+  badge_icon: github
+  badge_text: "TRENDING MINGGU INI · TOP 5"
+  title_lines:
+    - "5 Repo GitHub"
+    - "*paling trending*"
+    - "minggu ini."
+  subtitle: "#1 dari **Univer** — bikin Google Sheets & Docs versi AI open-source langsung di aplikasimu."
+  cta_text: "Geser buat lihat →"
+
+hashtags:
+  - "#github"
+  - "#opensource"
+  - "#trycatchdev"
+  - "#developerindonesia"
+  - "#aitools"
+  - "#coding"
+  - "#techindonesia"
+
+items:
+  - source: github
+    repo: "dream-num/univer"
+    eyebrow: "dream-num /"
+    title: "univer"
+    description: "AI Office SDK open-source buat bikin spreadsheet, dokumen, dan slide kolaboratif untuk tim & AI agent."
+    screenshot_path: "/tmp/tcd_weekly_cache/img_59a2fd720a9e0571.png"
+    url: "https://github.com/dream-num/univer"
+    badges:
+      - { text: "★ 31,817", style: "glass" }
+      - { text: "+3,278 minggu ini", style: "accent" }
+      - { text: "Apache-2.0", style: "glass" }
+    command_or_url: "$ npm install @univerjs/presets"
+    footnote: "SHEETS · DOCS · SLIDES · AI-AGENT READY"
+    footnote_accent: true
+    image_fit: "cover"
+    ambient_tint: "rgba(10, 14, 26, 0.80)"
+
+  - source: github
+    repo: "kajisho5/ffmpeg-skill"
+    eyebrow: "kajisho5 /"
+    title: "ffmpeg-skill"
+    description: "Video editor lokal untuk AI coding agent: 42 tools FFmpeg + MCP server biar AI bisa edit video otomatis."
+    screenshot_path: "/tmp/tcd_weekly_cache/img_3946036c487d87ab.png"
+    url: "https://github.com/kajisho5/ffmpeg-skill"
+    badges:
+      - { text: "★ 10,964", style: "glass" }
+      - { text: "+2,993 minggu ini", style: "accent" }
+      - { text: "MIT", style: "glass" }
+    command_or_url: "$ npx ffmpeg-skill setup"
+    footnote: "42 FFMPEG TOOLS · MCP SERVER · 100% LOKAL"
+    footnote_accent: true
+    image_fit: "cover"
+    ambient_tint: "rgba(10, 14, 26, 0.80)"
+
+  - source: github
+    repo: "meta/astryx"
+    eyebrow: "meta /"
+    title: "astryx"
+    description: "Design system open-source terbaru dari Meta yang fleksibel, modern, dan langsung siap dipakai AI agent."
+    screenshot_path: "/tmp/tcd_weekly_cache/img_c29b025e1e113b70.png"
+    url: "https://github.com/meta/astryx"
+    badges:
+      - { text: "★ 33,044", style: "glass" }
+      - { text: "+2,890 minggu ini", style: "accent" }
+      - { text: "MIT", style: "glass" }
+    footnote: "BY META · CUSTOMIZABLE UI · AGENT-READY"
+    footnote_accent: false
+    image_fit: "cover"
+    ambient_tint: "rgba(10, 14, 26, 0.82)"
+
+  - source: github
+    repo: "alibaba/open-code-review"
+    eyebrow: "alibaba /"
+    title: "open-code-review"
+    description: "Tool code review hybrid berstandar skala Alibaba: cepat, hemat token, gabungkan rule deterministik & AI."
+    screenshot_path: "/tmp/tcd_weekly_cache/img_c4bf0e9e515ef50d.png"
+    url: "https://github.com/alibaba/open-code-review"
+    badges:
+      - { text: "★ 56,270", style: "glass" }
+      - { text: "+2,638 minggu ini", style: "accent" }
+      - { text: "Apache-2.0", style: "glass" }
+    command_or_url: "$ git clone https://github.com/alibaba/open-code-review"
+    footnote: "HYBRID CODE REVIEW · HEMAT TOKEN · PRODUCTION SCALE"
+    footnote_accent: true
+    image_fit: "contain"
+    ambient_tint: "rgba(10, 14, 26, 0.84)"
+
+  - source: github
+    repo: "n8n-io/nod"
+    eyebrow: "n8n-io /"
+    title: "nod"
+    description: "Personal AI agent open-source dari n8n yang punya komputer sendiri buat bantu urus invoice, meeting & tugas harian."
+    screenshot_path: "/tmp/tcd_weekly_cache/img_815933771162da4d.webp"
+    url: "https://github.com/n8n-io/nod"
+    badges:
+      - { text: "★ 3,438", style: "glass" }
+      - { text: "+1,011 minggu ini", style: "accent" }
+      - { text: "Apache-2.0", style: "glass" }
+    footnote: "BY N8N · PERSONAL AGENT · OPEN SOURCE"
+    footnote_accent: false
+    image_fit: "cover"
+    ambient_tint: "rgba(10, 14, 26, 0.84)"
