@@ -9,9 +9,8 @@ theme:
   watermark_position: bottom-right
 
 cover:
-  mode: gradient
-  gradient_from: "#D4F93A"
-  gradient_to: "#38BDF8"
+  mode: photo
+  image_path: "/home/antigravity/tcd_weekly_top5_slides/tcd_studio_cover_v2.png"
   badge_icon: github
   badge_text: "TRENDING MINGGU INI · TOP 5"
   title_lines:
@@ -20,6 +19,30 @@ cover:
     - "minggu ini."
   subtitle: "#1 dari **Univer** — bikin Google Sheets & Docs versi AI open-source langsung di aplikasimu."
   cta_text: "Geser buat lihat →"
+
+outro:
+  enabled: true
+  badge_text: "PART 1 SELESAI · LANJUT PART 2?"
+  title_lines:
+    - "Save biar nggak"
+    - "*hilang,* & follow"
+    - "buat info terbaru."
+  subtitle: "Tiap minggu aku spill **tools open-source, AI workflow & website keren** yang benar-benar kepake."
+  actions:
+    - icon: bookmark
+      label: "Save postingan ini"
+      sublabel: "Biar gampang kamu buka lagi pas butuh"
+      accent: false
+    - icon: follow
+      label: "Follow @trycatchdev"
+      sublabel: "Biar nggak ketinggalan update & Part 2"
+      accent: true
+    - icon: comment
+      label: "Komen 'PART 2' di bawah"
+      sublabel: "Boleh juga request topik atau tool favoritmu"
+      accent: false
+  handle: "@trycatchdev"
+  footer_note: "OPEN SOURCE · AI · DEV TOOLS"
 
 hashtags:
   - "#github"

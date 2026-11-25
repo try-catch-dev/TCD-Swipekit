@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+:root {
+  --w: {{ width }}px;
+  --h: {{ height }}px;
+  --scale: {{ scale }};
+  --bg: {{ theme.cover_bg_color }};
+  --surface: {{ theme.pill_glass_bg }};
+  --border: {{ theme.pill_glass_border }};
+  --divider: {{ theme.divider_color }};
+  --text: {{ theme.text_color }};
+  --muted: {{ theme.muted_color }};
+  --subtle: {{ theme.subtle_color }};
+  --accent: {{ theme.accent_color }};
+  --accent-text: {{ theme.accent_text_color }};
+  --radius: {{ theme.card_radius }}px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  width: var(--w);
+  height: var(--h);
+  overflow: hidden;
+  background: var(--bg);
+  font-family: '{{ theme.font_body }}', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  color: var(--text);
+}
+
+.canvas {
+  position: relative;
+  width: var(--w);
+  height: var(--h);
+  background: var(--bg);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: calc(92px * var(--scale)) calc(84px * var(--scale)) calc(82px * var(--scale)) calc(84px * var(--scale));
+}
+
+.mesh-bg {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 86% 16%, {{ theme.accent_color }}38 0%, transparent 46%),
+    radial-gradient(circle at 14% 82%, #38BDF82C 0%, transparent 48%),
+    var(--bg);
+  z-index: 0;
+}
+
+.grid-pattern {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(to right, {{ theme.divider_color }} 1px, transparent 1px),
+    linear-gradient(to bottom, {{ theme.divider_color }} 1px, transparent 1px);
+  background-size: 68px 68px;
+  opacity: 0.45;
+  mask-image: radial-gradient(circle at 50% 42%, rgba(0, 0, 0, 0.85) 0%, transparent 78%);
+  -webkit-mask-image: radial-gradient(circle at 50% 42%, rgba(0, 0, 0, 0.85) 0%, transparent 78%);
+  z-index: 1;
+}
+
+.inner {
+  position: relative;
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  justify-content: space-between;
+}
+
+.top-group {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--accent);
+  color: var(--accent-text);
+  font-size: calc(25px * var(--scale));
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: calc(14px * var(--scale)) calc(30px * var(--scale));
+  border-radius: 999px;
+  margin-bottom: calc(44px * var(--scale));
+}
+
+.headline {
+  font-family: '{{ theme.font_heading }}', sans-serif;
+  font-size: calc(106px * var(--scale));
+  font-weight: 800;
+  line-height: 1.01;
+  letter-spacing: -0.045em;
+  color: var(--text);
+  margin-bottom: calc(34px * var(--scale));
+}
+
+.headline .accent {
+  color: var(--accent);
+}
+
+.subtitle {
+  font-size: calc(34px * var(--scale));
+  line-height: 1.44;
+  color: var(--muted);
+  max-width: 96%;
+  letter-spacing: -0.01em;
+}
+
+.subtitle strong {
+  color: var(--text);
+  font-weight: 700;
+}
+
+.actions {
+  display: flex;
+  flex-direction: column;
+  gap: calc(22px * var(--scale));
+  margin: calc(40px * var(--scale)) 0;
+}
+
+.action-card {
+  display: flex;
+  align-items: center;
+  gap: calc(28px * var(--scale));
+  padding: calc(30px * var(--scale)) calc(34px * var(--scale));
+  border-radius: var(--radius);
+  background: var(--surface);
+  border: 2px solid var(--border);
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.32);
+}
+
+.action-card.is-accent {
+  background: var(--accent);
+  border-color: var(--accent);
+  box-shadow: 0 18px 48px {{ theme.accent_color }}36;
+}
+
+.action-icon {
+  width: calc(74px * var(--scale));
+  height: calc(74px * var(--scale));
+  border-radius: calc(18px * var(--scale));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1.5px solid var(--border);
+  color: var(--accent);
+}
+
+.action-card.is-accent .action-icon {
+  background: rgba(8, 11, 16, 0.14);
+  border-color: rgba(8, 11, 16, 0.22);
+  color: var(--accent-text);
+}
+
+.action-icon svg {
+  width: calc(38px * var(--scale));
+  height: calc(38px * var(--scale));
+}
+
+.action-text {
+  display: flex;
+  flex-direction: column;
+  gap: calc(6px * var(--scale));
+}
+
+.action-label {
+  font-family: '{{ theme.font_heading }}', sans-serif;
+  font-size: calc(36px * var(--scale));
+  font-weight: 800;
+  letter-spacing: -0.025em;
+  color: var(--text);
+}
+
+.action-card.is-accent .action-label {
+  color: var(--accent-text);
+}
+
+.action-sub {
+  font-size: calc(27px * var(--scale));
+  font-weight: 400;
+  color: var(--muted);
+}
+
+.action-card.is-accent .action-sub {
+  color: rgba(8, 11, 16, 0.78);
+  font-weight: 500;
+}
+
+.bottom-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: calc(32px * var(--scale));
+  border-top: 2px solid var(--divider);
+}
+
+.handle-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  font-family: '{{ theme.font_mono }}', monospace;
+  font-size: calc(28px * var(--scale));
+  font-weight: 600;
+  color: var(--text);
+}
+
+.handle-dot {
+  width: calc(14px * var(--scale));
+  height: calc(14px * var(--scale));
+  border-radius: 999px;
+  background: var(--accent);
+  box-shadow: 0 0 16px var(--accent);
+}
+
+.footer-note {
+  font-size: calc(22px * var(--scale));
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--subtle);
+}
+</style>
+</head>
+<body>
+  <div class="canvas">
+    <div class="mesh-bg"></div>
+    <div class="grid-pattern"></div>
+
+    <div class="inner">
+      <div class="top-group">
+        {% if badge_text %}
+          <div class="badge">{{ badge_text }}</div>
+        {% endif %}
+
+        <div class="headline">
+          {% for line_html in title_lines_html %}
+            {{ line_html | safe }}{% if not loop.last %}<br />{% endif %}
+          {% endfor %}
+        </div>
+
+        {% if subtitle_html %}
+          <div class="subtitle">{{ subtitle_html | safe }}</div>
+        {% endif %}
+      </div>
+
+      <div class="actions">
+        {% for act in actions %}
+        <div class="action-card {{ 'is-accent' if act.accent else '' }}">
+          <div class="action-icon">{{ act.icon_svg | safe }}</div>
+          <div class="action-text">
+            <div class="action-label">{{ act.label }}</div>
+            {% if act.sublabel %}
+              <div class="action-sub">{{ act.sublabel }}</div>
+            {% endif %}
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+
+      <div class="bottom-bar">
+        <div class="handle-pill">
+          <span class="handle-dot"></span>
+          <span>{{ handle }}</span>
+        </div>
+        {% if footer_note %}
+          <div class="footer-note">{{ footer_note }}</div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</body>
+</html>

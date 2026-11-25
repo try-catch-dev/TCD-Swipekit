@@ -13,7 +13,7 @@ from playwright.sync_api import sync_playwright
 
 from tcd_swipekit.copywriter import build_caption_markdown
 from tcd_swipekit.image_utils import extract_ambient_tint, to_data_uri
-from tcd_swipekit.models import CoverConfig, DeckSpec, SlideItem, ThemeConfig
+from tcd_swipekit.models import CoverConfig, DeckSpec, OutroConfig, SlideItem, ThemeConfig
 from tcd_swipekit.themes.loader import TEMPLATES_DIR
 
 ICONS_SVG: dict[str, str] = {
@@ -160,13 +160,51 @@ class SlideRenderer:
             max_shot_height=max_shot_height,
         )
 
+    def build_outro_html(
+        self,
+        outro: OutroConfig,
+        theme: ThemeConfig,
+        width: int,
+        height: int,
+    ) -> str:
+        scale = min(width / 1180.0, height / 1572.0)
+        action_svgs = {
+            "bookmark": '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>',
+            "follow": '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>',
+            "comment": '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>',
+            "share": '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>',
+        }
+        lines = outro.title_lines or ["Save this post", "*& follow*", "for more tools."]
+        actions_ctx = [
+            {
+                "label": act.label,
+                "sublabel": act.sublabel,
+                "accent": act.accent,
+                "icon_svg": action_svgs.get(act.icon, action_svgs["bookmark"]),
+            }
+            for act in outro.actions
+        ]
+        template = self.env.get_template("outro.html.j2")
+        return template.render(
+            width=width,
+            height=height,
+            scale=f"{scale:.4f}",
+            theme=theme,
+            badge_text=outro.badge_text or "",
+            title_lines_html=[format_inline_accent(line) for line in lines],
+            subtitle_html=format_inline_bold(outro.subtitle) if outro.subtitle else "",
+            actions=actions_ctx,
+            handle=outro.handle or theme.watermark or "@trycatchdev",
+            footer_note=outro.footer_note or "",
+        )
+
     def render_deck(
         self,
         deck: DeckSpec,
         output_dir: Path,
         write_extras: bool = True,
     ) -> list[Path]:
-        """Render cover + all item slides to PNGs inside `output_dir`."""
+        """Render cover + all item slides + optional closing CTA slide to PNGs."""
         output_dir.mkdir(parents=True, exist_ok=True)
         width, height = deck.aspect_ratio.dimensions
 
@@ -205,6 +243,18 @@ class SlideRenderer:
                     slide_out = output_dir / filename
                     page.screenshot(path=str(slide_out), type="png")
                     rendered_paths.append(slide_out)
+
+                # Optional Closing CTA Slide
+                if deck.outro and deck.outro.enabled:
+                    outro_html = self.build_outro_html(deck.outro, deck.theme, width, height)
+                    page.set_content(outro_html, wait_until="load")
+                    with contextlib.suppress(Exception):
+                        page.wait_for_load_state("networkidle", timeout=5000)
+                    page.evaluate("document.fonts.ready")
+                    outro_num = len(deck.items) + 2
+                    outro_out = output_dir / f"{outro_num:02d}_closing_cta.png"
+                    page.screenshot(path=str(outro_out), type="png")
+                    rendered_paths.append(outro_out)
             finally:
                 browser.close()
 

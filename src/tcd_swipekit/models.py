@@ -128,6 +128,27 @@ class SlideItem(BaseModel):
     repo: str | None = None
 
 
+class OutroAction(BaseModel):
+    """Single call-to-action row on the closing slide (e.g., Save, Follow, Comment)."""
+
+    icon: Literal["bookmark", "follow", "comment", "share"] = "bookmark"
+    label: str
+    sublabel: str = ""
+    accent: bool = False
+
+
+class OutroConfig(BaseModel):
+    """Optional closing CTA slide configuration."""
+
+    enabled: bool = True
+    badge_text: str | None = None
+    title_lines: list[str] = Field(default_factory=list)
+    subtitle: str | None = None
+    actions: list[OutroAction] = Field(default_factory=list)
+    handle: str | None = None
+    footer_note: str | None = None
+
+
 class DeckSpec(BaseModel):
     """Complete serializable specification for a photo-slide carousel."""
 
@@ -137,6 +158,7 @@ class DeckSpec(BaseModel):
     part: int = 1
     theme: ThemeConfig = Field(default_factory=ThemeConfig)
     cover: CoverConfig = Field(default_factory=CoverConfig)
+    outro: OutroConfig | None = None
     items: list[SlideItem] = Field(default_factory=list)
     hashtags: list[str] = Field(default_factory=list)
 
@@ -168,5 +190,6 @@ class SitesFile(BaseModel):
     part: int = 1
     theme: dict[str, object] = Field(default_factory=dict)
     cover: CoverConfig = Field(default_factory=lambda: CoverConfig(badge_icon="globe"))
+    outro: OutroConfig | None = None
     hashtags: list[str] = Field(default_factory=list)
     sites: list[SiteEntry] = Field(default_factory=list)

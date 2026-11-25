@@ -1,0 +1,138 @@
+topic: "5 Tools Open-Source Keren Terbaru (Part 2)"
+language: id
+aspect_ratio: "3:4"
+part: 2
+
+theme:
+  preset: tcd-neon-lime
+  watermark: "@trycatchdev"
+  watermark_position: bottom-right
+
+cover:
+  mode: photo
+  image_path: "/home/antigravity/tcd_weekly_top5_slides/tcd_studio_cover_v2.png"
+  badge_icon: github
+  badge_text: "OPEN-SOURCE KEREN · PART 2"
+  title_lines:
+    - "5 Tools GitHub"
+    - "*keren terbaru*"
+    - "wajib kamu tahu."
+  subtitle: "#1 pakai **Magpie** — bebas ganti model AI di Claude Code, Codex & Gemini CLI lewat 1 klik."
+  cta_text: "Geser buat lihat →"
+
+outro:
+  enabled: true
+  badge_text: "PART 2 SELESAI · LANJUT PART 3?"
+  title_lines:
+    - "Save biar nggak"
+    - "*hilang,* & follow"
+    - "buat info terbaru."
+  subtitle: "Tiap minggu aku spill **tools open-source, AI workflow & website keren** yang benar-benar kepake."
+  actions:
+    - icon: bookmark
+      label: "Save postingan ini"
+      sublabel: "Biar gampang kamu buka lagi pas butuh"
+      accent: false
+    - icon: follow
+      label: "Follow @trycatchdev"
+      sublabel: "Biar nggak ketinggalan update & Part 3"
+      accent: true
+    - icon: comment
+      label: "Komen 'PART 3' di bawah"
+      sublabel: "Boleh juga request topik atau tool favoritmu"
+      accent: false
+  handle: "@trycatchdev"
+  footer_note: "OPEN SOURCE · AI · DEV TOOLS"
+
+hashtags:
+  - "#github"
+  - "#opensource"
+  - "#trycatchdev"
+  - "#aitools"
+  - "#coding"
+  - "#developerindonesia"
+  - "#techindonesia"
+
+items:
+  - source: github
+    repo: "yetone/magpie"
+    eyebrow: "yetone /"
+    title: "magpie"
+    description: "Atur semua model AI untuk coding agent di satu tempat. Jalankan Codex pakai DeepSeek atau Claude pakai Kimi."
+    screenshot_path: "/tmp/tcd_part2_picks/img_0da371085bce013f.png"
+    url: "https://github.com/yetone/magpie"
+    badges:
+      - { text: "★ 41,435", style: "glass" }
+      - { text: "+20,773 bulan ini", style: "accent" }
+      - { text: "MIT", style: "glass" }
+    command_or_url: "$ curl -fsSL https://usemagpie.ai/install.sh | sh"
+    footnote: "SATU GATEWAY · CLAUDE CODE · CODEX · GEMINI CLI"
+    footnote_accent: true
+    image_fit: "cover"
+    ambient_tint: "rgba(10, 14, 26, 0.82)"
+
+  - source: github
+    repo: "Nutlope/hallmark"
+    eyebrow: "Nutlope /"
+    title: "hallmark"
+    description: "Skill desain anti-'AI slop' untuk Claude Code, Cursor & Codex. Bikin UI hasil AI terlihat sekelas desainer pro."
+    screenshot_path: "/tmp/tcd_part2_picks/img_84af0aaa90847ec7.jpg"
+    url: "https://github.com/Nutlope/hallmark"
+    badges:
+      - { text: "★ 60,974", style: "glass" }
+      - { text: "+29,170 bulan ini", style: "accent" }
+      - { text: "MIT", style: "glass" }
+    command_or_url: "$ npx skills add nutlope/hallmark -g"
+    footnote: "ANTI-AI-SLOP · CLAUDE CODE · CURSOR · CODEX"
+    footnote_accent: true
+    image_fit: "cover"
+    ambient_tint: "rgba(10, 14, 26, 0.80)"
+
+  - source: github
+    repo: "HKUDS/DeepTutor"
+    eyebrow: "HKUDS /"
+    title: "DeepTutor"
+    description: "Tutor AI open-source untuk belajar topik rumit secara terstruktur—lengkap dengan bab materi & kuis interaktif."
+    screenshot_path: "/tmp/tcd_part2_picks/img_ee72510b1badde77.png"
+    url: "https://github.com/HKUDS/DeepTutor"
+    badges:
+      - { text: "★ 62,721", style: "glass" }
+      - { text: "+20,099 bulan ini", style: "accent" }
+      - { text: "Apache-2.0", style: "glass" }
+    footnote: "AI TUTOR · INTERACTIVE QUIZ · MARKDOWN"
+    footnote_accent: false
+    image_fit: "cover"
+    ambient_tint: "rgba(10, 14, 26, 0.82)"
+
+  - source: github
+    repo: "milind-soni/OpenMausBot"
+    eyebrow: "milind-soni /"
+    title: "OpenMausBot"
+    description: "Asisten AI open-source dengan virtual machine sendiri untuk riset mendalam, otomatisasi file, dan multi-bot lokal."
+    screenshot_path: "/tmp/tcd_part2_picks/img_527108753aeec5e6.png"
+    url: "https://github.com/milind-soni/OpenMausBot"
+    badges:
+      - { text: "★ 27,794", style: "glass" }
+      - { text: "+22,073 bulan ini", style: "accent" }
+      - { text: "MIT", style: "glass" }
+    footnote: "BUILT-IN VM · MULTI-AGENT · AUTOMATION & PLUGINS"
+    footnote_accent: false
+    image_fit: "cover"
+    ambient_tint: "rgba(10, 14, 26, 0.82)"
+
+  - source: github
+    repo: "pbakaus/impeccable"
+    eyebrow: "pbakaus /"
+    title: "impeccable"
+    description: "Kosakata & standar desain editorial untuk coding agent. Review otomatis UI supaya lebih rapi, berani, dan tidak kaku."
+    screenshot_path: "/tmp/tcd_part2_picks/img_3605c853b1454817.webp"
+    url: "https://github.com/pbakaus/impeccable"
+    badges:
+      - { text: "★ 116,744", style: "glass" }
+      - { text: "+30,688 bulan ini", style: "accent" }
+      - { text: "Apache-2.0", style: "glass" }
+    command_or_url: "$ npx impeccable install"
+    footnote: "DESIGN VOCABULARY · UI CRITIQUE · OPEN SOURCE"
+    footnote_accent: true
+    image_fit: "cover"
+    ambient_tint: "rgba(10, 14, 26, 0.82)"

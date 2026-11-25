@@ -11,6 +11,8 @@ from tcd_swipekit.models import (
     CoverMode,
     DeckSpec,
     Language,
+    OutroAction,
+    OutroConfig,
     SlideBadge,
     SlideItem,
     WatermarkPosition,
@@ -44,6 +46,15 @@ def test_render_deck_creates_valid_pngs_and_extras(tmp_path: Path):
             subtitle="#1 is **Sample Tool** — fast visual builder.",
             cta_text="Swipe to see them →",
         ),
+        outro=OutroConfig(
+            enabled=True,
+            badge_text="DONE · WANT PART 2?",
+            title_lines=["Save this post", "*& follow*", "for more tools."],
+            actions=[
+                OutroAction(icon="bookmark", label="Save post", sublabel="Keep for later"),
+                OutroAction(icon="follow", label="Follow @trycatchdev", accent=True),
+            ],
+        ),
         items=[
             SlideItem(
                 source="website",
@@ -66,8 +77,9 @@ def test_render_deck_creates_valid_pngs_and_extras(tmp_path: Path):
     out_dir = tmp_path / "rendered"
     paths = SlideRenderer().render_deck(deck, output_dir=out_dir)
 
-    assert len(paths) == 2
+    assert len(paths) == 3
     assert (out_dir / "01_cover.png").is_file()
+    assert (out_dir / "03_closing_cta.png").is_file()
     assert (out_dir / "caption.md").is_file()
     assert (out_dir / "deck.yaml").is_file()
     assert (out_dir / "preview.html").is_file()
