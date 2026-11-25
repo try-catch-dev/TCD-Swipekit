@@ -1,0 +1,70 @@
+[build-system]
+requires = ["hatchling>=1.25"]
+build-backend = "hatchling.build"
+
+[project]
+name = "tcd-swipekit"
+version = "0.1.0"
+description = "Generate modern social media photo-slide carousels from GitHub repos, websites (sites.yml), and custom YAML decks."
+readme = "README.md"
+license = { file = "LICENSE" }
+requires-python = ">=3.10"
+authors = [
+  { name = "Try Catch Dev" },
+]
+keywords = ["tiktok", "carousel", "slideshow", "github", "playwright", "cli", "social-media"]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Environment :: Console",
+  "Intended Audience :: Developers",
+  "License :: OSI Approved :: MIT License",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Topic :: Multimedia :: Graphics",
+]
+dependencies = [
+  "typer>=0.12.0",
+  "rich>=13.7.0",
+  "pydantic>=2.7.0",
+  "pyyaml>=6.0.1",
+  "jinja2>=3.1.4",
+  "playwright>=1.45.0",
+  "pillow>=10.3.0",
+  "httpx>=0.27.0",
+  "beautifulsoup4>=4.12.3",
+]
+
+[project.optional-dependencies]
+ai = [
+  "openai>=1.40.0",
+]
+dev = [
+  "pytest>=8.2.0",
+  "ruff>=0.6.0",
+]
+
+[project.scripts]
+swipekit = "tcd_swipekit.cli:app"
+tcd-swipekit = "tcd_swipekit.cli:app"
+
+[project.urls]
+Homepage = "https://github.com/try-catch-dev/TCD-Swipekit"
+Repository = "https://github.com/try-catch-dev/TCD-Swipekit.git"
+Issues = "https://github.com/try-catch-dev/TCD-Swipekit/issues"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/tcd_swipekit"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM"]
+ignore = ["E501", "B008"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra"

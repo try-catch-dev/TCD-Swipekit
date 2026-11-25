@@ -1,0 +1,51 @@
+topic: "Useful Websites for Developers"
+language: en
+aspect_ratio: "3:4"
+part: 1
+
+theme:
+  preset: cyber-indigo
+  watermark: "@trycatchdev"
+  watermark_position: bottom-right
+
+cover:
+  mode: gradient
+  badge_icon: globe
+  badge_text: "USEFUL WEBSITES · PART 1"
+  title_lines:
+    - "3 Websites"
+    - "*worth saving*"
+    - "right now."
+  subtitle: "#1 lets you sketch **clean architecture diagrams** in your browser with zero signup."
+  cta_text: "Swipe to see them →"
+
+hashtags:
+  - "#websites"
+  - "#devtools"
+  - "#productivity"
+  - "#webdev"
+  - "#coding"
+
+sites:
+  - url: "https://excalidraw.com"
+    title: "Excalidraw"
+    description: "Virtual hand-drawn whiteboard for system diagrams and wireframes. Fast, open-source, no account needed."
+    pricing: "Free"
+    category: "Whiteboard"
+    footnote: "OPEN SOURCE · REAL-TIME COLLAB · EXPORT SVG & PNG"
+    footnote_accent: true
+
+  - url: "https://transform.tools"
+    title: "Transform.tools"
+    description: "Polyglot web converter for JSON, TypeScript, GraphQL, SVG, and CSS. Instant and 100% browser-based."
+    pricing: "Free"
+    category: "Converter"
+    footnote: "CLIENT-SIDE · OPEN SOURCE · NO LOGIN"
+
+  - url: "https://ray.so"
+    title: "Ray.so"
+    description: "Create gorgeous code snippet images and icon assets in seconds with customizable themes and padding."
+    pricing: "Free"
+    category: "Design"
+    dark_mode: true
+    footnote: "BY RAYCAST · EXPORT PNG & SVG"

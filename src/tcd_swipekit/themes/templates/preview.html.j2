@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>{{ topic }} — TCD-Swipekit Preview</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #090a0d;
+    color: #f4f4f5;
+    font-family: Inter, -apple-system, BlinkMacSystemFont, sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 32px 20px;
+    gap: 20px;
+  }
+  header { text-align: center; }
+  h1 { font-size: 20px; font-weight: 700; margin-bottom: 6px; }
+  p { color: #a1a1aa; font-size: 14px; }
+  .viewer {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    max-width: 100%;
+  }
+  .frame {
+    width: min(440px, 84vw);
+    border-radius: 18px;
+    overflow: hidden;
+    box-shadow: 0 24px 60px rgba(0,0,0,0.65);
+    border: 1px solid rgba(255,255,255,0.12);
+    background: #000;
+  }
+  .frame img { width: 100%; display: block; }
+  button {
+    background: #18181b;
+    color: #fff;
+    border: 1px solid rgba(255,255,255,0.16);
+    border-radius: 999px;
+    width: 44px;
+    height: 44px;
+    font-size: 18px;
+    cursor: pointer;
+  }
+  button:hover { background: #27272a; }
+  .dots { display: flex; gap: 8px; }
+  .dot {
+    width: 8px; height: 8px; border-radius: 999px;
+    background: #3f3f46; cursor: pointer;
+  }
+  .dot.active { background: #48df76; width: 22px; }
+</style>
+</head>
+<body>
+  <header>
+    <h1>{{ topic }}</h1>
+    <p id="counter">Slide 1 / {{ slides | length }} — Use ← / → arrow keys</p>
+  </header>
+  <div class="viewer">
+    <button onclick="step(-1)" aria-label="Previous">←</button>
+    <div class="frame"><img id="slideImg" src="{{ slides[0] }}" alt="Slide preview" /></div>
+    <button onclick="step(1)" aria-label="Next">→</button>
+  </div>
+  <div class="dots" id="dots"></div>
+  <script>
+    const slides = {{ slides | tojson }};
+    let idx = 0;
+    const img = document.getElementById('slideImg');
+    const counter = document.getElementById('counter');
+    const dotsEl = document.getElementById('dots');
+    function render() {
+      img.src = slides[idx];
+      counter.textContent = `Slide ${idx + 1} / ${slides.length} — Use ← / → arrow keys`;
+      dotsEl.innerHTML = slides.map((_, i) =>
+        `<div class="dot ${i === idx ? 'active' : ''}" onclick="go(${i})"></div>`
+      ).join('');
+    }
+    function step(d) { idx = (idx + d + slides.length) % slides.length; render(); }
+    function go(i) { idx = i; render(); }
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight') step(1);
+      if (e.key === 'ArrowLeft') step(-1);
+    });
+    render();
+  </script>
+</body>
+</html>

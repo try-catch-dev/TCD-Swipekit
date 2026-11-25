@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+:root {
+  --w: {{ width }}px;
+  --h: {{ height }}px;
+  --scale: {{ scale }};
+  --bg: {{ theme.bg_color }};
+  --text: {{ theme.text_color }};
+  --muted: {{ theme.muted_color }};
+  --subtle: {{ theme.subtle_color }};
+  --divider: {{ theme.divider_color }};
+  --accent: {{ theme.accent_color }};
+  --pill-accent-bg: {{ theme.pill_accent_bg }};
+  --pill-accent-text: {{ theme.pill_accent_text }};
+  --pill-glass-bg: {{ theme.pill_glass_bg }};
+  --pill-glass-border: {{ theme.pill_glass_border }};
+  --cli-bg: {{ theme.cli_bg }};
+  --cli-border: {{ theme.cli_border }};
+  --cli-text: {{ theme.cli_text }};
+  --radius: {{ theme.card_radius }}px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  width: var(--w);
+  height: var(--h);
+  overflow: hidden;
+  background: var(--bg);
+  font-family: '{{ theme.font_body }}', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  color: var(--text);
+}
+
+.canvas {
+  position: relative;
+  width: var(--w);
+  height: var(--h);
+  background: var(--bg);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  padding: calc(84px * var(--scale)) calc(84px * var(--scale)) calc(74px * var(--scale)) calc(84px * var(--scale));
+}
+
+.ambient-bg {
+  position: absolute;
+  inset: -120px;
+  background-image: url("{{ image_uri }}");
+  background-size: cover;
+  background-position: center;
+  filter: blur(110px) saturate({{ theme.ambient_saturation }}) brightness({{ theme.ambient_brightness }});
+  transform: scale(1.18);
+  z-index: 0;
+}
+
+.ambient-overlay {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    circle at 50% 48%,
+    rgba(10, 12, 16, 0.16) 0%,
+    {{ ambient_tint }} 78%,
+    rgba(6, 7, 10, 0.92) 100%
+  );
+  z-index: 1;
+}
+
+.inner {
+  position: relative;
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.top-bar {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: calc(38px * var(--scale));
+}
+
+.num {
+  font-family: '{{ theme.font_heading }}', sans-serif;
+  font-size: calc(116px * var(--scale));
+  font-weight: 800;
+  line-height: 0.92;
+  letter-spacing: -0.04em;
+  color: var(--text);
+}
+
+.divider {
+  width: 100%;
+  height: 2px;
+  background: var(--divider);
+  margin-bottom: calc(38px * var(--scale));
+}
+
+.eyebrow {
+  font-size: calc(36px * var(--scale));
+  font-weight: 400;
+  color: var(--subtle);
+  letter-spacing: -0.01em;
+  margin-bottom: calc(8px * var(--scale));
+}
+
+.title {
+  font-family: '{{ theme.font_heading }}', sans-serif;
+  font-size: calc({{ title_size }}px * var(--scale));
+  font-weight: 800;
+  line-height: 1.02;
+  letter-spacing: -0.04em;
+  color: var(--text);
+  margin-bottom: calc(26px * var(--scale));
+  word-break: break-word;
+}
+
+.desc {
+  font-size: calc(34px * var(--scale));
+  font-weight: 400;
+  line-height: 1.38;
+  color: var(--muted);
+  letter-spacing: -0.01em;
+  max-width: 98%;
+}
+
+.visual-wrap {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: calc(30px * var(--scale)) 0 calc(32px * var(--scale)) 0;
+  min-height: 0;
+}
+
+.shot {
+  max-width: 100%;
+  max-height: {{ max_shot_height }}px;
+  width: auto;
+  height: auto;
+  border-radius: var(--radius);
+  box-shadow: {{ '0 26px 68px rgba(0, 0, 0, 0.56), 0 0 0 1px rgba(255, 255, 255, 0.10)' if not theme.is_light else '0 20px 50px rgba(17, 18, 20, 0.14), 0 0 0 1px rgba(17, 18, 20, 0.08)' }};
+  object-fit: {{ item.image_fit }};
+  display: block;
+}
+
+.shot-placeholder {
+  width: 100%;
+  height: {{ (max_shot_height * 0.72) | int }}px;
+  border-radius: var(--radius);
+  background: linear-gradient(135deg, {{ theme.accent_color }}22, rgba(255, 255, 255, 0.04));
+  border: 1.5px solid var(--divider);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 40px;
+  text-align: center;
+}
+
+.shot-placeholder-title {
+  font-size: calc(44px * var(--scale));
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: var(--text);
+}
+
+.shot-placeholder-sub {
+  font-family: '{{ theme.font_mono }}', monospace;
+  font-size: calc(24px * var(--scale));
+  color: var(--subtle);
+}
+
+.footer {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: calc(22px * var(--scale));
+}
+
+.pills {
+  display: flex;
+  align-items: center;
+  gap: calc(16px * var(--scale));
+  flex-wrap: wrap;
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: calc(72px * var(--scale));
+  padding: 0 calc(32px * var(--scale));
+  border-radius: 999px;
+  font-size: calc(28px * var(--scale));
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+}
+
+.pill-glass {
+  background: var(--pill-glass-bg);
+  border: 1.5px solid var(--pill-glass-border);
+  color: var(--text);
+  backdrop-filter: blur(12px);
+}
+
+.pill-accent {
+  background: var(--pill-accent-bg);
+  color: var(--pill-accent-text);
+  font-weight: 700;
+  padding: 0 calc(36px * var(--scale));
+  box-shadow: 0 8px 24px {{ theme.pill_accent_bg }}40;
+}
+
+.cli-pill {
+  display: inline-flex;
+  align-items: center;
+  background: var(--cli-bg);
+  border: 1.5px solid var(--cli-border);
+  border-radius: 999px;
+  padding: calc(18px * var(--scale)) calc(34px * var(--scale));
+  font-family: '{{ theme.font_mono }}', monospace;
+  font-size: calc(24px * var(--scale));
+  font-weight: 500;
+  color: var(--cli-text);
+  letter-spacing: -0.02em;
+  max-width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.micro-note {
+  font-size: calc(21px * var(--scale));
+  font-weight: 700;
+  letter-spacing: 0.085em;
+  text-transform: uppercase;
+  padding-left: 6px;
+  color: {{ theme.accent_color if item.footnote_accent else theme.subtle_color }};
+}
+
+.watermark {
+  position: absolute;
+  z-index: 20;
+  font-size: calc(24px * var(--scale));
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  color: var(--subtle);
+}
+.wm-bottom-right { right: calc(84px * var(--scale)); bottom: calc(74px * var(--scale)); }
+.wm-top-right { right: calc(84px * var(--scale)); top: calc(92px * var(--scale)); }
+.wm-bottom-left { left: calc(84px * var(--scale)); bottom: calc(24px * var(--scale)); }
+</style>
+</head>
+<body>
+  <div class="canvas">
+    {% if theme.ambient_blur and image_uri and not theme.is_light %}
+      <div class="ambient-bg"></div>
+      <div class="ambient-overlay"></div>
+    {% endif %}
+
+    <div class="inner">
+      <div class="top-bar">
+        <div class="num">{{ slide_number }}</div>
+      </div>
+      <div class="divider"></div>
+      {% if item.eyebrow %}
+        <div class="eyebrow">{{ item.eyebrow }}</div>
+      {% endif %}
+      <div class="title">{{ item.title }}</div>
+      {% if item.description %}
+        <div class="desc">{{ item.description }}</div>
+      {% endif %}
+
+      <div class="visual-wrap">
+        {% if image_uri %}
+          <img class="shot" src="{{ image_uri }}" alt="{{ item.title }}" />
+        {% else %}
+          <div class="shot-placeholder">
+            <div class="shot-placeholder-title">{{ item.title }}</div>
+            {% if item.url %}
+              <div class="shot-placeholder-sub">{{ item.url }}</div>
+            {% endif %}
+          </div>
+        {% endif %}
+      </div>
+
+      <div class="footer">
+        {% if item.badges %}
+        <div class="pills">
+          {% for badge in item.badges %}
+            <div class="pill pill-{{ badge.style.value }}">{{ badge.text }}</div>
+          {% endfor %}
+        </div>
+        {% endif %}
+
+        {% if item.command_or_url %}
+          <div class="cli-pill">{{ item.command_or_url }}</div>
+        {% endif %}
+
+        {% if item.footnote %}
+          <div class="micro-note">{{ item.footnote }}</div>
+        {% endif %}
+      </div>
+    </div>
+
+    {% if theme.watermark %}
+      <div class="watermark wm-{{ theme.watermark_position.value }}">{{ theme.watermark }}</div>
+    {% endif %}
+  </div>
+</body>
+</html>

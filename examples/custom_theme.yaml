@@ -1,0 +1,29 @@
+# Example custom theme for TCD-Swipekit
+# Usage: swipekit generate github --theme examples/custom_theme.yaml
+
+preset: sunset-amber
+is_light: false
+bg_color: "#110D0A"
+cover_bg_color: "#090705"
+text_color: "#FFFBF5"
+muted_color: "rgba(255, 245, 232, 0.80)"
+subtle_color: "rgba(253, 219, 179, 0.62)"
+divider_color: "rgba(251, 191, 36, 0.22)"
+accent_color: "#F59E0B"
+accent_text_color: "#1A0F02"
+pill_accent_bg: "#D97706"
+pill_accent_text: "#FFFFFF"
+pill_glass_bg: "rgba(245, 158, 11, 0.10)"
+pill_glass_border: "rgba(245, 158, 11, 0.25)"
+cli_bg: "rgba(18, 12, 8, 0.90)"
+cli_border: "rgba(245, 158, 11, 0.22)"
+cli_text: "#FEF3C7"
+font_heading: "Inter"
+font_body: "Inter"
+font_mono: "JetBrains Mono"
+ambient_blur: true
+ambient_brightness: 0.32
+ambient_saturation: 1.40
+card_radius: 24
+watermark: "@trycatchdev"
+watermark_position: bottom-right

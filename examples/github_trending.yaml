@@ -1,0 +1,41 @@
+topic: "Trending Open Source Tools"
+language: en
+aspect_ratio: "3:4"
+part: 1
+
+theme:
+  preset: midnight-emerald
+  watermark: "@trycatchdev"
+  watermark_position: bottom-right
+
+cover:
+  mode: gradient
+  badge_icon: github
+  badge_text: "TRENDING THIS WEEK · PART 1"
+  title_lines:
+    - "3 GitHub tools"
+    - "*blowing up*"
+    - "right now."
+  subtitle: "#1 turns long podcasts & YouTube videos into **ready-to-post short clips** with local AI."
+  cta_text: "Swipe to see them →"
+
+items:
+  - source: github
+    repo: "zhouxiaoka/autoclip"
+    title: "autoclip"
+    description: "Open-source AI desktop app that turns long videos and podcasts into captioned TikTok, Reels & Shorts."
+    command_or_url: "$ git clone https://github.com/zhouxiaoka/autoclip"
+    footnote: "LOCAL AI · YOUTUBE, TIKTOK, REELS & SHORTS"
+    footnote_accent: true
+
+  - source: github
+    repo: "we-promise/sure"
+    title: "sure"
+    description: "Clean, self-hostable personal finance and net worth tracker with built-in cashflow analytics."
+    footnote: "SELF-HOSTED · PRIVACY FIRST · CASHFLOW"
+
+  - source: github
+    repo: "kunkundi/crossdesk"
+    title: "crossdesk"
+    description: "Lightweight open-source remote desktop alternative to AnyDesk with direct browser web client access."
+    footnote: "WINDOWS · MACOS · LINUX · WEB CLIENT"

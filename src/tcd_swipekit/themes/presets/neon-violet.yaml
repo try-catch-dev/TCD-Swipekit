@@ -1,0 +1,24 @@
+preset: neon-violet
+is_light: false
+bg_color: "#0D0915"
+cover_bg_color: "#07040C"
+text_color: "#FAF5FF"
+muted_color: "rgba(233, 213, 255, 0.82)"
+subtle_color: "rgba(196, 181, 253, 0.64)"
+divider_color: "rgba(192, 132, 252, 0.22)"
+accent_color: "#C084FC"
+accent_text_color: "#170726"
+pill_accent_bg: "#9333EA"
+pill_accent_text: "#FFFFFF"
+pill_glass_bg: "rgba(192, 132, 252, 0.09)"
+pill_glass_border: "rgba(192, 132, 252, 0.22)"
+cli_bg: "rgba(13, 8, 22, 0.90)"
+cli_border: "rgba(192, 132, 252, 0.20)"
+cli_text: "#F3E8FF"
+font_heading: "Inter"
+font_body: "Inter"
+font_mono: "JetBrains Mono"
+ambient_blur: true
+ambient_brightness: 0.34
+ambient_saturation: 1.55
+card_radius: 26

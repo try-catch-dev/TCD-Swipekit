@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+:root {
+  --w: {{ width }}px;
+  --h: {{ height }}px;
+  --scale: {{ scale }};
+  --bg: {{ theme.cover_bg_color }};
+  --text: {{ theme.text_color }};
+  --muted: {{ theme.muted_color }};
+  --subtle: {{ theme.subtle_color }};
+  --accent: {{ theme.accent_color }};
+  --accent-text: {{ theme.accent_text_color }};
+  --pill-bg: {{ theme.pill_glass_bg }};
+  --pill-border: {{ theme.pill_glass_border }};
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  width: var(--w);
+  height: var(--h);
+  overflow: hidden;
+  background: var(--bg);
+  font-family: '{{ theme.font_heading }}', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  color: var(--text);
+}
+
+.canvas {
+  position: relative;
+  width: var(--w);
+  height: var(--h);
+  background: var(--bg);
+  overflow: hidden;
+}
+
+/* Mode: PHOTO */
+.hero-photo {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 59%;
+  object-fit: cover;
+  object-position: center 42%;
+  filter: contrast(1.06) brightness(0.95);
+}
+
+.hero-fade {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 65%;
+  background: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0.08) 0%,
+    rgba(0, 0, 0, 0.06) 36%,
+    rgba(0, 0, 0, 0.56) 60%,
+    {{ theme.cover_bg_color }} 88%
+  );
+}
+
+/* Mode: GRADIENT */
+.mesh-bg {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 82% 18%, {{ cover.gradient_from or theme.accent_color }}55 0%, transparent 48%),
+    radial-gradient(circle at 18% 28%, {{ cover.gradient_to or theme.pill_accent_bg }}44 0%, transparent 52%),
+    radial-gradient(circle at 50% 85%, {{ theme.accent_color }}18 0%, transparent 55%),
+    var(--bg);
+}
+
+.grid-pattern {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(to right, rgba(255, 255, 255, {{ '0.04' if not theme.is_light else '0.0' }}) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, {{ '0.04' if not theme.is_light else '0.0' }}) 1px, transparent 1px);
+  background-size: 64px 64px;
+  mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.9) 0%, rgba(0, 0, 0, 0.2) 55%, transparent 82%);
+  -webkit-mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.9) 0%, rgba(0, 0, 0, 0.2) 55%, transparent 82%);
+}
+
+/* Mode: MINIMAL */
+.minimal-accent-bar {
+  position: absolute;
+  top: calc(86px * var(--scale));
+  left: calc(82px * var(--scale));
+  width: calc(120px * var(--scale));
+  height: calc(10px * var(--scale));
+  border-radius: 999px;
+  background: var(--accent);
+}
+
+.content {
+  position: absolute;
+  left: calc(82px * var(--scale));
+  right: calc(82px * var(--scale));
+  bottom: calc(82px * var(--scale));
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.badge-row {
+  display: flex;
+  align-items: center;
+  gap: calc(20px * var(--scale));
+  margin-bottom: calc(34px * var(--scale));
+}
+
+.icon-wrap {
+  width: calc(64px * var(--scale));
+  height: calc(64px * var(--scale));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.icon-wrap svg {
+  width: 100%;
+  height: 100%;
+}
+
+.trend-pill {
+  background: var(--accent);
+  color: var(--accent-text);
+  font-size: calc(26px * var(--scale));
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  padding: calc(15px * var(--scale)) calc(32px * var(--scale));
+  border-radius: 999px;
+  text-transform: uppercase;
+  line-height: 1;
+}
+
+.headline {
+  font-size: calc({{ headline_size }}px * var(--scale));
+  font-weight: 800;
+  line-height: 0.99;
+  letter-spacing: -0.045em;
+  color: var(--text);
+  margin-bottom: calc(40px * var(--scale));
+}
+
+.headline .accent {
+  color: var(--accent);
+}
+
+.subtitle {
+  font-family: '{{ theme.font_body }}', -apple-system, sans-serif;
+  font-size: calc(36px * var(--scale));
+  font-weight: 400;
+  line-height: 1.42;
+  color: var(--muted);
+  max-width: 94%;
+  margin-bottom: calc(50px * var(--scale));
+  letter-spacing: -0.01em;
+}
+
+.subtitle strong {
+  color: var(--text);
+  font-weight: 700;
+}
+
+.cta-row {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.cta-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  background: {{ 'rgba(23, 24, 27, 0.92)' if not theme.is_light else '#18181B' }};
+  border: 2px solid {{ 'rgba(255, 255, 255, 0.16)' if not theme.is_light else 'rgba(17, 18, 20, 0.14)' }};
+  color: #F4F4F5;
+  font-size: calc(30px * var(--scale));
+  font-weight: 600;
+  padding: calc(21px * var(--scale)) calc(40px * var(--scale));
+  border-radius: 999px;
+  letter-spacing: -0.01em;
+}
+
+.watermark {
+  position: absolute;
+  z-index: 20;
+  font-size: calc(25px * var(--scale));
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  color: var(--subtle);
+}
+.wm-bottom-right { right: calc(82px * var(--scale)); bottom: calc(96px * var(--scale)); }
+.wm-top-right { right: calc(82px * var(--scale)); top: calc(74px * var(--scale)); }
+.wm-bottom-left { left: calc(82px * var(--scale)); bottom: calc(30px * var(--scale)); }
+</style>
+</head>
+<body>
+  <div class="canvas">
+    {% if cover.mode.value == 'photo' and cover_image_uri %}
+      <img class="hero-photo" src="{{ cover_image_uri }}" alt="Cover" />
+      <div class="hero-fade"></div>
+    {% elif cover.mode.value == 'minimal' %}
+      <div class="minimal-accent-bar"></div>
+    {% else %}
+      <div class="mesh-bg"></div>
+      <div class="grid-pattern"></div>
+    {% endif %}
+
+    <div class="content">
+      {% if badge_text %}
+      <div class="badge-row">
+        {% if badge_icon_svg %}
+          <div class="icon-wrap">{{ badge_icon_svg | safe }}</div>
+        {% endif %}
+        <div class="trend-pill">{{ badge_text }}</div>
+      </div>
+      {% endif %}
+
+      <div class="headline">
+        {% for line_html in title_lines_html %}
+          {{ line_html | safe }}{% if not loop.last %}<br />{% endif %}
+        {% endfor %}
+      </div>
+
+      {% if subtitle_html %}
+      <div class="subtitle">{{ subtitle_html | safe }}</div>
+      {% endif %}
+
+      {% if cta_text %}
+      <div class="cta-row">
+        <div class="cta-pill">{{ cta_text }}</div>
+      </div>
+      {% endif %}
+    </div>
+
+    {% if theme.watermark %}
+      <div class="watermark wm-{{ theme.watermark_position.value }}">{{ theme.watermark }}</div>
+    {% endif %}
+  </div>
+</body>
+</html>
