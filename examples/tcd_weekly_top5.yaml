@@ -86,7 +86,7 @@ items:
     eyebrow: "alibaba /"
     title: "open-code-review"
     description: "Tool code review hybrid berstandar skala Alibaba: cepat, hemat token, gabungkan rule deterministik & AI."
-    screenshot_path: "/tmp/tcd_weekly_cache/img_c4bf0e9e515ef50d.png"
+    screenshot_path: "/tmp/tcd_weekly_cache/ocr_benchmark.png"
     url: "https://github.com/alibaba/open-code-review"
     badges:
       - { text: "★ 56,270", style: "glass" }
@@ -95,8 +95,8 @@ items:
     command_or_url: "$ git clone https://github.com/alibaba/open-code-review"
     footnote: "HYBRID CODE REVIEW · HEMAT TOKEN · PRODUCTION SCALE"
     footnote_accent: true
-    image_fit: "contain"
-    ambient_tint: "rgba(10, 14, 26, 0.84)"
+    image_fit: "cover"
+    ambient_tint: "rgba(10, 14, 26, 0.80)"
 
   - source: github
     repo: "n8n-io/nod"

@@ -78,8 +78,19 @@ def extract_readme_image_urls(markdown: str, owner: str, repo: str, branch: str)
             seen.add(raw_url)
             candidates.append(raw_url)
 
-    # Prefer URLs mentioning screenshot/demo/dashboard/preview/ui/hero
-    priority_words = ("screenshot", "dashboard", "preview", "ui", "desktop", "home", "hero", "demo")
+    # Prefer URLs mentioning screenshot/demo/dashboard/preview/ui/hero/benchmark
+    priority_words = (
+        "screenshot",
+        "dashboard",
+        "preview",
+        "benchmark",
+        "interface",
+        "ui",
+        "desktop",
+        "home",
+        "hero",
+        "demo",
+    )
     candidates.sort(key=lambda u: 0 if any(w in u.lower() for w in priority_words) else 1)
     return candidates
 
@@ -243,8 +254,11 @@ class GitHubSource(BaseSource):
         license_label = str(spdx) if spdx and spdx != "NOASSERTION" else "Open Source"
         raw_desc = str(meta.get("description") or "").strip()
 
-        # Fetch README to find official screenshot
+        # Fetch README to find official screenshot (prefer well-proportioned visuals over skinny banners)
+        from PIL import Image
+
         screenshot_path: Path | None = None
+        fallback_banner: Path | None = None
         branches_to_try = [branch] if branch == "HEAD" else [branch, "HEAD"]
         with httpx.Client(follow_redirects=True, timeout=15.0) as client:
             for br in branches_to_try:
@@ -255,15 +269,26 @@ class GitHubSource(BaseSource):
                         candidates = extract_readme_image_urls(r.text, owner, repo, br)
                         for img_url in candidates[:6]:
                             downloaded = download_image(img_url, self.cache_dir)
-                            if downloaded is not None:
-                                screenshot_path = (
-                                    smart_crop_margins(downloaded) if crop_margins else downloaded
-                                )
+                            if downloaded is None:
+                                continue
+                            with Image.open(downloaded) as im:
+                                w, h = im.size
+                            ratio = w / max(1, h)
+                            processed = (
+                                smart_crop_margins(downloaded) if crop_margins else downloaded
+                            )
+                            if 0.75 <= ratio <= 2.6:
+                                screenshot_path = processed
                                 break
+                            if fallback_banner is None:
+                                fallback_banner = processed
                         if screenshot_path is not None:
                             break
                 if screenshot_path is not None:
                     break
+
+        if screenshot_path is None:
+            screenshot_path = fallback_banner
 
         stars_str = str(meta.get("stargazers_label") or f"{stars:,}")
         badges = []
