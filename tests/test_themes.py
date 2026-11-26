@@ -11,7 +11,17 @@ from tcd_swipekit.themes.loader import list_presets, load_theme
 
 def test_builtin_presets_load():
     presets = list_presets()
-    assert {"midnight-emerald", "cyber-indigo", "neon-violet", "editorial-light"}.issubset(set(presets))
+    expected = {
+        "midnight-emerald",
+        "cyber-indigo",
+        "neon-violet",
+        "editorial-light",
+        "amber-noir",
+        "arctic-slate",
+        "crimson-carbon",
+        "nord-frost",
+    }
+    assert expected.issubset(set(presets))
     for name in presets:
         cfg = load_theme(name)
         assert cfg.preset == name

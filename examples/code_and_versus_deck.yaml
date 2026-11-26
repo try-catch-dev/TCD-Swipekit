@@ -1,0 +1,126 @@
+topic: "Python & Tooling Upgrades Worth Switching To"
+language: en
+aspect_ratio: "3:4"
+part: 1
+
+theme:
+  preset: midnight-emerald
+  watermark: "@yourhandle"
+  watermark_position: bottom-right
+
+cover:
+  mode: gradient
+  badge_icon: sparkles
+  badge_text: "DEV TIPS · PART 1"
+  title_lines:
+    - "Clean Code"
+    - "*& Modern Tools*"
+    - "worth switching to."
+  subtitle: "Practical **Python refactors** and side-by-side **tooling upgrades**."
+  cta_text: "Swipe to see them →"
+
+outro:
+  enabled: true
+  badge_text: "DONE · WANT PART 2?"
+  title_lines:
+    - "Save this post"
+    - "*& follow*"
+    - "for more dev tips."
+  subtitle: "Weekly **code audits, open-source tools & comparisons**."
+  actions:
+    - icon: bookmark
+      label: "Save this post"
+      sublabel: "Keep it handy for your next PR review"
+      accent: false
+    - icon: follow
+      label: "Follow @yourhandle"
+      sublabel: "Don't miss Part 2 next week"
+      accent: true
+    - icon: comment
+      label: "Comment 'PART 2'"
+      sublabel: "Which refactor do you want next?"
+      accent: false
+  handle: "@yourhandle"
+  footer_note: "CLEAN CODE · PYTHON · DEV TOOLS"
+
+items:
+  - source: manual
+    layout: code
+    eyebrow: "python / refactor"
+    title: "Avoid N+1 Loops"
+    description: "Replace nested dictionary lookups with a single indexed dict comprehension."
+    code_block:
+      filename: "orders_service.py"
+      language: "diff"
+      diff_mode: true
+      code: |
+        - def attach_users(orders, users):
+        -     for order in orders:
+        -         for u in users:
+        -             if u["id"] == order["user_id"]:
+        -                 order["user"] = u
+        + def attach_users(orders, users):
+        +     user_by_id = {u["id"]: u for u in users}
+        +     for order in orders:
+        +         order["user"] = user_by_id.get(order["user_id"])
+    badges:
+      - { text: "O(n²) → O(n)", style: "accent" }
+      - { text: "Python 3.10+", style: "glass" }
+    footnote: "CLEANER · FASTER · ZERO EXTRA DEPS"
+    footnote_accent: true
+
+  - source: manual
+    layout: code
+    eyebrow: "python / stdlib"
+    title: "Typed Dataclasses"
+    description: "Use slots=True on frozen dataclasses for faster attribute access and lower memory."
+    code_block:
+      filename: "models.py"
+      language: "python"
+      highlight_lines: [4, 5]
+      code: |
+        from dataclasses import dataclass
+
+        @dataclass(frozen=True, slots=True)
+        class UserEvent:
+            user_id: str
+            action: str
+            latency_ms: float = 0.0
+    badges:
+      - { text: "-40% RAM", style: "accent" }
+      - { text: "Immutable", style: "glass" }
+    command_or_url: "python -m timeit -s 'from models import UserEvent'"
+    footnote: "BUILT INTO PYTHON STANDARD LIBRARY"
+
+  - source: manual
+    layout: versus
+    eyebrow: "python / packaging"
+    title: "pip vs uv"
+    description: "Why modern Python teams are migrating their CI and local workflows to uv."
+    versus:
+      left:
+        label: "pip + venv"
+        badge: "LEGACY"
+        headline: "Classic toolchain, multiple separate CLIs."
+        points:
+          - "Slow dependency resolution on large projects"
+          - "Separate tools for venv, lockfiles, and Python versions"
+          - "Cold CI installs can take 60–120 seconds"
+        code: "python -m venv .venv && pip install -r requirements.txt"
+        accent: false
+      right:
+        label: "uv"
+        badge: "RECOMMENDED"
+        headline: "Single Rust binary for packages, venvs & Python."
+        points:
+          - "10–100× faster installs with global wheel cache"
+          - "Built-in lockfile, workspaces, and Python manager"
+          - "Drop-in uv pip interface for existing scripts"
+        code: "uv sync --frozen"
+        accent: true
+      verdict: "Switch to uv for instant local setups and 5× faster CI pipelines."
+    badges:
+      - { text: "Rust-powered", style: "accent" }
+      - { text: "MIT / Apache-2.0", style: "glass" }
+    footnote: "DOCS.ASTRAL.SH/UV"
+    footnote_accent: true

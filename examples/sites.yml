@@ -5,7 +5,7 @@ part: 1
 
 theme:
   preset: cyber-indigo
-  watermark: "@trycatchdev"
+  watermark: "@yourhandle"
   watermark_position: bottom-right
 
 cover:

@@ -1,0 +1,24 @@
+preset: nord-frost
+is_light: false
+bg_color: "#0E1621"
+cover_bg_color: "#0A1019"
+text_color: "#F1F5F9"
+muted_color: "rgba(203, 213, 225, 0.82)"
+subtle_color: "rgba(148, 163, 184, 0.74)"
+divider_color: "rgba(45, 212, 191, 0.20)"
+accent_color: "#2DD4BF"
+accent_text_color: "#041C1A"
+pill_accent_bg: "#0D9488"
+pill_accent_text: "#FFFFFF"
+pill_glass_bg: "rgba(45, 212, 191, 0.08)"
+pill_glass_border: "rgba(45, 212, 191, 0.22)"
+cli_bg: "rgba(9, 14, 22, 0.92)"
+cli_border: "rgba(45, 212, 191, 0.20)"
+cli_text: "#CCFBF1"
+font_heading: "Plus Jakarta Sans"
+font_body: "Inter"
+font_mono: "Fira Code"
+ambient_blur: true
+ambient_brightness: 0.34
+ambient_saturation: 1.42
+card_radius: 24

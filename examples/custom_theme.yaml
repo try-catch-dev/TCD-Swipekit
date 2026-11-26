@@ -25,5 +25,5 @@ ambient_blur: true
 ambient_brightness: 0.32
 ambient_saturation: 1.40
 card_radius: 24
-watermark: "@trycatchdev"
+watermark: "@yourhandle"
 watermark_position: bottom-right
