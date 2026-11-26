@@ -14,12 +14,59 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 32px 20px;
-    gap: 20px;
+    padding: 28px 20px 40px;
+    gap: 16px;
   }
-  header { text-align: center; }
-  h1 { font-size: 20px; font-weight: 700; margin-bottom: 6px; }
-  p { color: #a1a1aa; font-size: 14px; }
+  header { text-align: center; display: flex; flex-direction: column; gap: 6px; align-items: center; }
+  h1 { font-size: 20px; font-weight: 700; letter-spacing: -0.02em; }
+  .meta-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; justify-content: center; }
+  .meta-pill {
+    font-size: 12px;
+    font-weight: 600;
+    color: #a1a1aa;
+    background: #18181b;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 999px;
+    padding: 4px 12px;
+  }
+  .meta-pill a { color: #48df76; text-decoration: none; }
+  .meta-pill a:hover { text-decoration: underline; }
+  .toolbar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: center;
+    background: #121318;
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    border-radius: 999px;
+    padding: 6px 10px;
+  }
+  .toolbar-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: #a1a1aa;
+    padding: 0 6px;
+  }
+  .zone-btn {
+    background: transparent;
+    color: #d4d4d8;
+    border: 1px solid transparent;
+    border-radius: 999px;
+    padding: 6px 14px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    width: auto;
+    height: auto;
+    transition: all 0.15s ease;
+  }
+  .zone-btn:hover { background: rgba(255, 255, 255, 0.08); }
+  .zone-btn.active {
+    background: #48df76;
+    color: #09130c;
+    border-color: #48df76;
+  }
   .viewer {
     display: flex;
     align-items: center;
@@ -27,53 +74,266 @@
     max-width: 100%;
   }
   .frame {
+    position: relative;
     width: min(440px, 84vw);
     border-radius: 18px;
     overflow: hidden;
-    box-shadow: 0 24px 60px rgba(0,0,0,0.65);
-    border: 1px solid rgba(255,255,255,0.12);
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.65);
+    border: 1px solid rgba(255, 255, 255, 0.12);
     background: #000;
   }
   .frame img { width: 100%; display: block; }
-  button {
+
+  /* Platform Safe-Zone HUD Overlay */
+  .safe-overlay {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    display: none;
+    z-index: 10;
+  }
+  .safe-overlay.visible { display: block; }
+  .danger-zone {
+    position: absolute;
+    background: rgba(239, 68, 68, 0.22);
+    border: 1px dashed rgba(248, 113, 113, 0.65);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .zone-tag {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: rgba(254, 226, 226, 0.95);
+    background: rgba(127, 29, 29, 0.72);
+    padding: 2px 8px;
+    border-radius: 999px;
+    white-space: nowrap;
+  }
+  .safe-box {
+    position: absolute;
+    border: 1.5px dashed rgba(72, 223, 118, 0.85);
+    border-radius: 8px;
+    box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.25);
+  }
+  .safe-box-label {
+    position: absolute;
+    top: 6px;
+    left: 8px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #09130c;
+    background: rgba(72, 223, 118, 0.92);
+    padding: 2px 7px;
+    border-radius: 999px;
+  }
+  .mock-actions {
+    position: absolute;
+    right: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+  }
+  .mock-circle {
+    width: 30px;
+    height: 30px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.24);
+    border: 1.5px solid rgba(255, 255, 255, 0.65);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    color: #fff;
+  }
+  .mock-caption-lines {
+    position: absolute;
+    left: 14px;
+    bottom: 14px;
+    right: 64px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .mock-line {
+    height: 8px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.35);
+  }
+
+  .nav-btn {
     background: #18181b;
     color: #fff;
-    border: 1px solid rgba(255,255,255,0.16);
+    border: 1px solid rgba(255, 255, 255, 0.16);
     border-radius: 999px;
     width: 44px;
     height: 44px;
     font-size: 18px;
     cursor: pointer;
+    flex-shrink: 0;
   }
-  button:hover { background: #27272a; }
-  .dots { display: flex; gap: 8px; }
+  .nav-btn:hover { background: #27272a; }
+  .dots { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
   .dot {
     width: 8px; height: 8px; border-radius: 999px;
     background: #3f3f46; cursor: pointer;
+    transition: width 0.15s ease, background 0.15s ease;
   }
   .dot.active { background: #48df76; width: 22px; }
+  .hint { color: #71717a; font-size: 12px; }
 </style>
 </head>
 <body>
   <header>
     <h1>{{ topic }}</h1>
-    <p id="counter">Slide 1 / {{ slides | length }} — Use ← / → arrow keys</p>
+    <div class="meta-row">
+      <span class="meta-pill" id="counter">Slide 1 / {{ slides | length }}</span>
+      {% if aspect_ratio %}
+      <span class="meta-pill">{{ aspect_ratio }}{% if width and height %} · {{ width }}×{{ height }}{% endif %}</span>
+      {% endif %}
+      <span class="meta-pill" id="filename">{{ slides[0] }}</span>
+      {% if pdf_filename %}
+      <span class="meta-pill"><a href="{{ pdf_filename }}" target="_blank">📄 {{ pdf_filename }}</a></span>
+      {% endif %}
+    </div>
   </header>
-  <div class="viewer">
-    <button onclick="step(-1)" aria-label="Previous">←</button>
-    <div class="frame"><img id="slideImg" src="{{ slides[0] }}" alt="Slide preview" /></div>
-    <button onclick="step(1)" aria-label="Next">→</button>
+
+  <div class="toolbar" role="group" aria-label="Platform Safe-Zone Overlay">
+    <span class="toolbar-label">Safe Zone:</span>
+    <button class="zone-btn active" data-zone="off" onclick="setZone('off')">Off</button>
+    <button class="zone-btn" data-zone="tiktok" onclick="setZone('tiktok')">TikTok</button>
+    <button class="zone-btn" data-zone="reels" onclick="setZone('reels')">IG Reels</button>
+    <button class="zone-btn" data-zone="ig-carousel" onclick="setZone('ig-carousel')">IG Carousel</button>
+    <button class="zone-btn" data-zone="linkedin" onclick="setZone('linkedin')">LinkedIn</button>
   </div>
+
+  <div class="viewer">
+    <button class="nav-btn" onclick="step(-1)" aria-label="Previous">←</button>
+    <div class="frame">
+      <img id="slideImg" src="{{ slides[0] }}" alt="Slide preview" />
+      <div id="safeOverlay" class="safe-overlay" aria-hidden="true"></div>
+    </div>
+    <button class="nav-btn" onclick="step(1)" aria-label="Next">→</button>
+  </div>
+
   <div class="dots" id="dots"></div>
+  <p class="hint">Keys: ← / → navigate slides · S cycle safe-zone overlay</p>
+
   <script>
     const slides = {{ slides | tojson }};
+    const zoneOrder = ['off', 'tiktok', 'reels', 'ig-carousel', 'linkedin'];
+    const zoneSpecs = {
+      tiktok: {
+        label: 'TikTok Safe Area',
+        top: 11, bottom: 22, left: 4, right: 16,
+        topTag: 'TikTok Top Bar',
+        bottomTag: 'Caption & Audio Bar',
+        rightTag: 'UI',
+        showActions: true,
+        showCaption: true,
+      },
+      reels: {
+        label: 'IG Reels Safe Area',
+        top: 10, bottom: 20, left: 4, right: 15,
+        topTag: 'Reels Header',
+        bottomTag: 'Handle & Audio',
+        rightTag: 'UI',
+        showActions: true,
+        showCaption: true,
+      },
+      'ig-carousel': {
+        label: 'IG Carousel Safe Area',
+        top: 6, bottom: 10, left: 4, right: 4,
+        topTag: 'Slide Counter Pill',
+        bottomTag: 'Carousel Indicator Dots',
+        rightTag: '',
+        showActions: false,
+        showCaption: false,
+      },
+      linkedin: {
+        label: 'LinkedIn Document Safe Area',
+        top: 8, bottom: 10, left: 4, right: 4,
+        topTag: 'Doc Title Bar',
+        bottomTag: 'Page Controls & Fullscreen',
+        rightTag: '',
+        showActions: false,
+        showCaption: false,
+      },
+    };
+
     let idx = 0;
+    let activeZone = 'off';
     const img = document.getElementById('slideImg');
     const counter = document.getElementById('counter');
+    const filenameEl = document.getElementById('filename');
     const dotsEl = document.getElementById('dots');
+    const overlayEl = document.getElementById('safeOverlay');
+
+    function renderOverlay() {
+      document.querySelectorAll('.zone-btn').forEach((btn) => {
+        btn.classList.toggle('active', btn.dataset.zone === activeZone);
+      });
+      if (activeZone === 'off') {
+        overlayEl.classList.remove('visible');
+        overlayEl.innerHTML = '';
+        return;
+      }
+      const z = zoneSpecs[activeZone];
+      let html = `
+        <div class="danger-zone" style="top:0;left:0;right:0;height:${z.top}%;">
+          <span class="zone-tag">${z.topTag}</span>
+        </div>
+        <div class="danger-zone" style="bottom:0;left:0;right:0;height:${z.bottom}%;">
+          <span class="zone-tag">${z.bottomTag}</span>
+        </div>
+      `;
+      if (z.right > 6) {
+        html += `
+          <div class="danger-zone" style="top:${z.top}%;bottom:${z.bottom}%;right:0;width:${z.right}%;"></div>
+        `;
+      }
+      html += `
+        <div class="safe-box" style="top:${z.top}%;bottom:${z.bottom}%;left:${z.left}%;right:${z.right}%;">
+          <span class="safe-box-label">${z.label}</span>
+        </div>
+      `;
+      if (z.showActions) {
+        html += `
+          <div class="mock-actions" style="bottom:${z.bottom + 3}%;">
+            <div class="mock-circle">♥</div>
+            <div class="mock-circle">💬</div>
+            <div class="mock-circle">🔖</div>
+            <div class="mock-circle">↗</div>
+          </div>
+        `;
+      }
+      if (z.showCaption) {
+        html += `
+          <div class="mock-caption-lines">
+            <div class="mock-line" style="width:42%;"></div>
+            <div class="mock-line" style="width:82%;"></div>
+            <div class="mock-line" style="width:60%;"></div>
+          </div>
+        `;
+      }
+      overlayEl.innerHTML = html;
+      overlayEl.classList.add('visible');
+    }
+
+    function setZone(zone) {
+      activeZone = zone;
+      renderOverlay();
+    }
+
     function render() {
       img.src = slides[idx];
-      counter.textContent = `Slide ${idx + 1} / ${slides.length} — Use ← / → arrow keys`;
+      counter.textContent = `Slide ${idx + 1} / ${slides.length}`;
+      filenameEl.textContent = slides[idx];
       dotsEl.innerHTML = slides.map((_, i) =>
         `<div class="dot ${i === idx ? 'active' : ''}" onclick="go(${i})"></div>`
       ).join('');
@@ -83,8 +343,13 @@
     window.addEventListener('keydown', (e) => {
       if (e.key === 'ArrowRight') step(1);
       if (e.key === 'ArrowLeft') step(-1);
+      if (e.key === 's' || e.key === 'S') {
+        const nextIdx = (zoneOrder.indexOf(activeZone) + 1) % zoneOrder.length;
+        setZone(zoneOrder[nextIdx]);
+      }
     });
     render();
+    renderOverlay();
   </script>
 </body>
 </html>

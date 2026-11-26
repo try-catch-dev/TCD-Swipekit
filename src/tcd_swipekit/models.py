@@ -5,7 +5,7 @@ from __future__ import annotations
 from enum import Enum
 from typing import Literal
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
 
 
 class Language(str, Enum):
@@ -33,6 +33,11 @@ class AspectRatio(str, Enum):
         }
         return mapping[self]
 
+    @property
+    def folder_slug(self) -> str:
+        """Filesystem-safe folder name for multi-ratio batch exports (e.g., '3x4')."""
+        return self.value.replace(":", "x")
+
 
 class CoverMode(str, Enum):
     """Visual layout mode for Slide 1 cover."""
@@ -57,11 +62,49 @@ class WatermarkPosition(str, Enum):
     BOTTOM_LEFT = "bottom-left"
 
 
+class SlideLayout(str, Enum):
+    """Visual layout variant for content slides."""
+
+    SHOWCASE = "showcase"  # Hero screenshot / repo / website card (default)
+    CODE = "code"          # Syntax-highlighted code snippet or terminal diff card
+    VERSUS = "versus"      # Side-by-side or stacked A-vs-B comparison card
+
+
 class SlideBadge(BaseModel):
     """Metadata pill shown beneath the hero screenshot."""
 
     text: str
     style: BadgeStyle = BadgeStyle.GLASS
+
+
+class CodeBlock(BaseModel):
+    """Configuration for a syntax-highlighted code or diff slide (`layout: code`)."""
+
+    code: str
+    language: str = "python"
+    filename: str | None = None
+    highlight_lines: list[int] = Field(default_factory=list)
+    show_line_numbers: bool = True
+    diff_mode: bool = False
+
+
+class VersusSide(BaseModel):
+    """One side (Left/Top or Right/Bottom) of a comparison slide (`layout: versus`)."""
+
+    label: str
+    badge: str | None = None
+    headline: str | None = None
+    points: list[str] = Field(default_factory=list)
+    code: str | None = None
+    accent: bool = False
+
+
+class VersusBlock(BaseModel):
+    """Structured A-vs-B comparison block (`layout: versus`)."""
+
+    left: VersusSide
+    right: VersusSide
+    verdict: str | None = None
 
 
 class CoverConfig(BaseModel):
@@ -101,6 +144,7 @@ class ThemeConfig(BaseModel):
     font_heading: str = "Inter"
     font_body: str = "Inter"
     font_mono: str = "JetBrains Mono"
+    font_files: dict[str, str] = Field(default_factory=dict)
     ambient_blur: bool = True
     ambient_brightness: float = 0.34
     ambient_saturation: float = 1.45
@@ -110,9 +154,10 @@ class ThemeConfig(BaseModel):
 
 
 class SlideItem(BaseModel):
-    """Unified schema for a single content slide (GitHub, Website, or Manual)."""
+    """Unified schema for a single content slide (GitHub, Website, Code, Versus, or Manual)."""
 
     source: Literal["github", "website", "manual"] = "manual"
+    layout: SlideLayout = SlideLayout.SHOWCASE
     eyebrow: str = ""
     title: str
     description: str = ""
@@ -126,6 +171,17 @@ class SlideItem(BaseModel):
     image_fit: Literal["contain", "cover"] = "contain"
     ambient_tint: str | None = None
     repo: str | None = None
+    code_block: CodeBlock | None = None
+    versus: VersusBlock | None = None
+
+    @model_validator(mode="after")
+    def _infer_layout_from_content(self) -> SlideItem:
+        if self.layout == SlideLayout.SHOWCASE:
+            if self.code_block is not None:
+                self.layout = SlideLayout.CODE
+            elif self.versus is not None:
+                self.layout = SlideLayout.VERSUS
+        return self
 
 
 class OutroAction(BaseModel):
@@ -147,6 +203,23 @@ class OutroConfig(BaseModel):
     actions: list[OutroAction] = Field(default_factory=list)
     handle: str | None = None
     footer_note: str | None = None
+
+
+class CreatorProfile(BaseModel):
+    """Reusable creator brand defaults loaded from `.swipekit.yaml` or `~/.config/swipekit/config.yaml`."""
+
+    theme: str | None = None
+    accent_color: str | None = None
+    watermark: str | None = None
+    watermark_position: WatermarkPosition | None = None
+    language: Language | None = None
+    aspect_ratio: AspectRatio | None = None
+    ratios: list[AspectRatio] | None = None
+    cover_mode: CoverMode | None = None
+    cover_image: str | None = None
+    outro: OutroConfig | None = None
+    export_pdf: bool | None = None
+    hashtags: list[str] | None = None
 
 
 class DeckSpec(BaseModel):

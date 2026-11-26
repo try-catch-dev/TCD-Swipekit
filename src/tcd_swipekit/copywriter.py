@@ -6,7 +6,53 @@ import os
 import re
 
 from tcd_swipekit.i18n import t
-from tcd_swipekit.models import DeckSpec, Language
+from tcd_swipekit.models import DeckSpec, Language, OutroAction, OutroConfig
+
+
+def build_default_outro(
+    language: Language = Language.EN,
+    handle: str | None = None,
+    part: int = 1,
+) -> OutroConfig:
+    """Create a localized default Save / Follow / Comment closing CTA slide."""
+    next_part = part + 1
+    follow_label = (
+        t(language, "outro_follow_label", handle=handle)
+        if handle
+        else ("Follow akun ini" if language == Language.ID else "Follow for more")
+    )
+    return OutroConfig(
+        enabled=True,
+        badge_text=t(language, "outro_badge", next_part=next_part),
+        title_lines=[
+            t(language, "outro_title_1"),
+            t(language, "outro_title_2"),
+            t(language, "outro_title_3"),
+        ],
+        subtitle=t(language, "outro_subtitle"),
+        actions=[
+            OutroAction(
+                icon="bookmark",
+                label=t(language, "outro_save_label"),
+                sublabel=t(language, "outro_save_sub"),
+                accent=False,
+            ),
+            OutroAction(
+                icon="follow",
+                label=follow_label,
+                sublabel=t(language, "outro_follow_sub", next_part=next_part),
+                accent=True,
+            ),
+            OutroAction(
+                icon="comment",
+                label=t(language, "outro_comment_label", next_part=next_part),
+                sublabel=t(language, "outro_comment_sub"),
+                accent=False,
+            ),
+        ],
+        handle=handle,
+        footer_note=t(language, "outro_footer"),
+    )
 
 
 def clean_short_description(text: str, max_chars: int = 128) -> str:

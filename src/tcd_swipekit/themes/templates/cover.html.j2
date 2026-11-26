@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap');
+{{ font_css | safe }}
 
 :root {
   --w: {{ width }}px;
@@ -81,8 +81,8 @@ html, body {
   position: absolute;
   inset: 0;
   background-image:
-    linear-gradient(to right, rgba(255, 255, 255, {{ '0.04' if not theme.is_light else '0.0' }}) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(255, 255, 255, {{ '0.04' if not theme.is_light else '0.0' }}) 1px, transparent 1px);
+    linear-gradient(to right, {{ 'rgba(17, 18, 20, 0.06)' if theme.is_light else 'rgba(255, 255, 255, 0.04)' }} 1px, transparent 1px),
+    linear-gradient(to bottom, {{ 'rgba(17, 18, 20, 0.06)' if theme.is_light else 'rgba(255, 255, 255, 0.04)' }} 1px, transparent 1px);
   background-size: 64px 64px;
   mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.9) 0%, rgba(0, 0, 0, 0.2) 55%, transparent 82%);
   -webkit-mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.9) 0%, rgba(0, 0, 0, 0.2) 55%, transparent 82%);
@@ -120,10 +120,14 @@ html, body {
 .icon-wrap {
   width: calc(64px * var(--scale));
   height: calc(64px * var(--scale));
+  border-radius: 999px;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  {% if theme.is_light %}
+  box-shadow: 0 4px 14px rgba(17, 18, 20, 0.14), 0 0 0 1.5px rgba(17, 18, 20, 0.12);
+  {% endif %}
 }
 
 .icon-wrap svg {

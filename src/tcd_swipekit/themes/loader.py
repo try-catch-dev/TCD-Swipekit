@@ -25,8 +25,10 @@ def load_theme(
 ) -> ThemeConfig:
     """Load a ThemeConfig from a preset name or custom YAML path and merge overrides."""
     candidate_path = Path(str(preset_or_path))
+    theme_base_dir: Path | None = None
     if candidate_path.is_file():
         base_data = yaml.safe_load(candidate_path.read_text(encoding="utf-8")) or {}
+        theme_base_dir = candidate_path.parent
     else:
         preset_file = PRESETS_DIR / f"{preset_or_path}.yaml"
         if not preset_file.is_file():
@@ -42,5 +44,14 @@ def load_theme(
         for k, v in overrides.items():
             if v is not None:
                 merged[k] = v
+
+    if theme_base_dir and isinstance(merged.get("font_files"), dict):
+        resolved_fonts: dict[str, str] = {}
+        for fam, fpath in merged["font_files"].items():
+            p = Path(str(fpath)).expanduser()
+            if not p.is_absolute():
+                p = (theme_base_dir / p).resolve()
+            resolved_fonts[str(fam)] = str(p)
+        merged["font_files"] = resolved_fonts
 
     return ThemeConfig.model_validate(merged)

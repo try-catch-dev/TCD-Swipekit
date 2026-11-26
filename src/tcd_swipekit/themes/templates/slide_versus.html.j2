@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<style>
+{{ font_css | safe }}
+
+:root {
+  --w: {{ width }}px;
+  --h: {{ height }}px;
+  --scale: {{ scale }};
+  --bg: {{ theme.bg_color }};
+  --text: {{ theme.text_color }};
+  --muted: {{ theme.muted_color }};
+  --subtle: {{ theme.subtle_color }};
+  --divider: {{ theme.divider_color }};
+  --accent: {{ theme.accent_color }};
+  --accent-text: {{ theme.accent_text_color }};
+  --pill-accent-bg: {{ theme.pill_accent_bg }};
+  --pill-accent-text: {{ theme.pill_accent_text }};
+  --pill-glass-bg: {{ theme.pill_glass_bg }};
+  --pill-glass-border: {{ theme.pill_glass_border }};
+  --cli-bg: {{ theme.cli_bg }};
+  --cli-border: {{ theme.cli_border }};
+  --cli-text: {{ theme.cli_text }};
+  --radius: {{ theme.card_radius }}px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  width: var(--w);
+  height: var(--h);
+  overflow: hidden;
+  background: var(--bg);
+  font-family: '{{ theme.font_body }}', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  color: var(--text);
+}
+
+.canvas {
+  position: relative;
+  width: var(--w);
+  height: var(--h);
+  background: var(--bg);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  padding: calc(64px * var(--scale)) calc(80px * var(--scale)) calc(62px * var(--scale)) calc(80px * var(--scale));
+}
+
+.ambient-glow {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 86% 78%, {{ theme.accent_color }}{{ '26' if not theme.is_light else '16' }} 0%, transparent 48%),
+    radial-gradient(circle at 14% 22%, rgba(244, 63, 94, {{ '0.14' if not theme.is_light else '0.08' }}) 0%, transparent 44%);
+  z-index: 0;
+}
+
+.inner {
+  position: relative;
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.top-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: calc(20px * var(--scale));
+}
+
+.num {
+  font-family: '{{ theme.font_heading }}', sans-serif;
+  font-size: calc(88px * var(--scale));
+  font-weight: 800;
+  line-height: 0.92;
+  letter-spacing: -0.04em;
+  color: var(--text);
+}
+
+.layout-chip {
+  display: inline-flex;
+  align-items: center;
+  font-family: '{{ theme.font_mono }}', monospace;
+  font-size: calc(21px * var(--scale));
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: calc(10px * var(--scale)) calc(22px * var(--scale));
+  border-radius: 999px;
+  background: var(--pill-glass-bg);
+  border: 1.5px solid var(--pill-glass-border);
+  color: var(--accent);
+}
+
+.divider {
+  width: 100%;
+  height: 2px;
+  background: var(--divider);
+  margin-bottom: calc(20px * var(--scale));
+}
+
+.eyebrow {
+  font-size: calc(27px * var(--scale));
+  font-weight: 500;
+  color: var(--subtle);
+  margin-bottom: calc(4px * var(--scale));
+}
+
+.title {
+  font-family: '{{ theme.font_heading }}', sans-serif;
+  font-size: calc({{ title_size }}px * var(--scale));
+  font-weight: 800;
+  line-height: 1.03;
+  letter-spacing: -0.04em;
+  color: var(--text);
+  margin-bottom: calc(12px * var(--scale));
+  word-break: break-word;
+}
+
+.desc {
+  font-size: calc(27px * var(--scale));
+  font-weight: 400;
+  line-height: 1.32;
+  color: var(--muted);
+  max-width: 98%;
+}
+
+.versus-stage {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: calc(14px * var(--scale));
+  margin: calc(18px * var(--scale)) 0;
+  min-height: 0;
+}
+
+.versus-grid {
+  display: flex;
+  flex-direction: {{ 'row' if side_by_side else 'column' }};
+  align-items: stretch;
+  gap: calc(12px * var(--scale));
+}
+
+.side-card {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: calc(10px * var(--scale));
+  padding: calc(22px * var(--scale)) calc(28px * var(--scale));
+  border-radius: var(--radius);
+  background: {{ 'rgba(255, 255, 255, 0.045)' if not theme.is_light else '#FFFFFF' }};
+  border: 2px solid {{ 'rgba(255, 255, 255, 0.12)' if not theme.is_light else 'rgba(17, 18, 20, 0.12)' }};
+  box-shadow: {{ '0 16px 38px rgba(0, 0, 0, 0.34)' if not theme.is_light else '0 12px 30px rgba(17, 18, 20, 0.08)' }};
+}
+
+.side-card.is-accent {
+  background: {{ theme.accent_color }}{{ '16' if not theme.is_light else '14' }};
+  border-color: {{ theme.accent_color }};
+  box-shadow: 0 16px 42px {{ theme.accent_color }}28;
+}
+
+.side-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.side-label {
+  font-family: '{{ theme.font_heading }}', sans-serif;
+  font-size: calc(33px * var(--scale));
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: var(--text);
+}
+
+.side-badge {
+  font-family: '{{ theme.font_mono }}', monospace;
+  font-size: calc(17px * var(--scale));
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: calc(7px * var(--scale)) calc(16px * var(--scale));
+  border-radius: 999px;
+  background: rgba(244, 63, 94, 0.16);
+  color: {{ '#FDA4AF' if not theme.is_light else '#BE123C' }};
+  border: 1px solid rgba(244, 63, 94, 0.36);
+  white-space: nowrap;
+}
+
+.side-card.is-accent .side-badge {
+  background: var(--accent);
+  color: var(--accent-text);
+  border-color: var(--accent);
+}
+
+.side-headline {
+  font-size: calc(24px * var(--scale));
+  font-weight: 600;
+  color: var(--muted);
+  line-height: 1.28;
+}
+
+.side-points {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: calc(8px * var(--scale));
+}
+
+.side-points li {
+  display: flex;
+  align-items: flex-start;
+  gap: calc(12px * var(--scale));
+  font-size: calc({{ '22' if side_by_side else '24' }}px * var(--scale));
+  line-height: 1.32;
+  color: var(--text);
+}
+
+.pt-mark {
+  flex-shrink: 0;
+  width: calc(28px * var(--scale));
+  height: calc(28px * var(--scale));
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(17px * var(--scale));
+  font-weight: 800;
+  margin-top: calc(2px * var(--scale));
+  background: rgba(244, 63, 94, 0.18);
+  color: {{ '#FB7185' if not theme.is_light else '#E11D48' }};
+}
+
+.side-card.is-accent .pt-mark {
+  background: {{ theme.accent_color }}28;
+  color: var(--accent);
+}
+
+.side-code {
+  margin-top: calc(2px * var(--scale));
+  padding: calc(12px * var(--scale)) calc(18px * var(--scale));
+  border-radius: calc(12px * var(--scale));
+  background: {{ 'rgba(8, 10, 14, 0.84)' if not theme.is_light else '#14161C' }};
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  font-family: '{{ theme.font_mono }}', monospace;
+  font-size: calc({{ '19' if side_by_side else '21' }}px * var(--scale));
+  line-height: 1.4;
+  color: #E4E4E7;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.vs-divider {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.vs-line {
+  flex: 1;
+  height: {{ '0' if side_by_side else '2px' }};
+  background: var(--divider);
+}
+
+.vs-badge {
+  width: calc(54px * var(--scale));
+  height: calc(54px * var(--scale));
+  border-radius: 999px;
+  background: var(--accent);
+  color: var(--accent-text);
+  font-family: '{{ theme.font_heading }}', sans-serif;
+  font-size: calc(21px * var(--scale));
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8px 24px {{ theme.accent_color }}44;
+}
+
+.verdict-bar {
+  display: flex;
+  align-items: center;
+  gap: calc(12px * var(--scale));
+  padding: calc(16px * var(--scale)) calc(24px * var(--scale));
+  border-radius: calc(16px * var(--scale));
+  background: var(--pill-glass-bg);
+  border: 1.5px solid var(--pill-glass-border);
+  font-size: calc(23px * var(--scale));
+  font-weight: 600;
+  color: var(--text);
+}
+
+.verdict-dot {
+  width: calc(12px * var(--scale));
+  height: calc(12px * var(--scale));
+  border-radius: 999px;
+  background: var(--accent);
+  flex-shrink: 0;
+}
+
+.footer {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: calc(14px * var(--scale));
+}
+
+.pills {
+  display: flex;
+  align-items: center;
+  gap: calc(12px * var(--scale));
+  flex-wrap: wrap;
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: calc(56px * var(--scale));
+  padding: 0 calc(26px * var(--scale));
+  border-radius: 999px;
+  font-size: calc(23px * var(--scale));
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.pill-glass {
+  background: var(--pill-glass-bg);
+  border: 1.5px solid var(--pill-glass-border);
+  color: var(--text);
+}
+
+.pill-accent {
+  background: var(--pill-accent-bg);
+  color: var(--pill-accent-text);
+  font-weight: 700;
+}
+
+.micro-note {
+  font-size: calc(21px * var(--scale));
+  font-weight: 700;
+  letter-spacing: 0.085em;
+  text-transform: uppercase;
+  padding-left: 6px;
+  color: {{ theme.accent_color if item.footnote_accent else theme.subtle_color }};
+}
+
+.watermark {
+  position: absolute;
+  z-index: 20;
+  font-size: calc(24px * var(--scale));
+  font-weight: 600;
+  color: var(--subtle);
+}
+.wm-bottom-right { right: calc(84px * var(--scale)); bottom: calc(72px * var(--scale)); }
+.wm-top-right { right: calc(84px * var(--scale)); top: calc(92px * var(--scale)); }
+.wm-bottom-left { left: calc(84px * var(--scale)); bottom: calc(24px * var(--scale)); }
+</style>
+</head>
+<body>
+  <div class="canvas">
+    <div class="ambient-glow"></div>
+
+    <div class="inner">
+      <div class="top-bar">
+        <div class="num">{{ slide_number }}</div>
+        <div class="layout-chip">VS COMPARE</div>
+      </div>
+      <div class="divider"></div>
+      {% if item.eyebrow %}
+        <div class="eyebrow">{{ item.eyebrow }}</div>
+      {% endif %}
+      <div class="title">{{ item.title }}</div>
+      {% if item.description %}
+        <div class="desc">{{ item.description }}</div>
+      {% endif %}
+
+      <div class="versus-stage">
+        <div class="versus-grid">
+          {% for side in [versus.left, versus.right] %}
+          <div class="side-card {{ 'is-accent' if side.accent else '' }}">
+            <div class="side-header">
+              <div class="side-label">{{ side.label }}</div>
+              {% if side.badge %}
+                <div class="side-badge">{{ side.badge }}</div>
+              {% endif %}
+            </div>
+            {% if side.headline %}
+              <div class="side-headline">{{ side.headline }}</div>
+            {% endif %}
+            {% if side.points %}
+              <ul class="side-points">
+                {% for pt in side.points %}
+                <li>
+                  <span class="pt-mark">{{ '✓' if side.accent else '✗' }}</span>
+                  <span>{{ pt }}</span>
+                </li>
+                {% endfor %}
+              </ul>
+            {% endif %}
+            {% if side.code %}
+              <pre class="side-code">{{ side.code }}</pre>
+            {% endif %}
+          </div>
+          {% if loop.first %}
+          <div class="vs-divider">
+            <div class="vs-line"></div>
+            <div class="vs-badge">VS</div>
+            <div class="vs-line"></div>
+          </div>
+          {% endif %}
+          {% endfor %}
+        </div>
+
+        {% if versus.verdict %}
+        <div class="verdict-bar">
+          <span class="verdict-dot"></span>
+          <span>{{ versus.verdict }}</span>
+        </div>
+        {% endif %}
+      </div>
+
+      <div class="footer">
+        {% if item.badges %}
+        <div class="pills">
+          {% for badge in item.badges %}
+            <div class="pill pill-{{ badge.style.value }}">{{ badge.text }}</div>
+          {% endfor %}
+        </div>
+        {% endif %}
+
+        {% if item.footnote %}
+          <div class="micro-note">{{ item.footnote }}</div>
+        {% endif %}
+      </div>
+    </div>
+
+    {% if theme.watermark %}
+      <div class="watermark wm-{{ theme.watermark_position.value }}">{{ theme.watermark }}</div>
+    {% endif %}
+  </div>
+</body>
+</html>
