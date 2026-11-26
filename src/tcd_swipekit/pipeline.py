@@ -163,6 +163,7 @@ def generate_website_deck(
         part=effective_part,
         theme=theme,
         cover=cover,
+        outro=parsed.outro,
         items=items,
         hashtags=parsed.hashtags,
     )

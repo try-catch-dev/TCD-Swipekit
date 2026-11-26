@@ -1,0 +1,106 @@
+topic: "5 Website Paling Berguna yang Wajib Kamu Bookmark"
+language: id
+aspect_ratio: "3:4"
+part: 1
+
+theme:
+  preset: tcd-neon-lime
+  watermark: "@trycatchdev"
+  watermark_position: bottom-right
+
+cover:
+  mode: photo
+  image_path: "/home/antigravity/tcd_weekly_top5_slides/tcd_studio_cover_v2.png"
+  badge_icon: globe
+  badge_text: "WEBSITE WAJIB TAU · PART 1"
+  title_lines:
+    - "5 Website"
+    - "*paling berguna*"
+    - "wajib kamu simpan."
+  subtitle: "#1 **Excalidraw** — bikin diagram arsitektur & sketsa ide super cepat langsung di browser, gratis tanpa login."
+  cta_text: "Geser buat lihat →"
+
+outro:
+  enabled: true
+  badge_text: "PART 1 SELESAI · LANJUT PART 2?"
+  title_lines:
+    - "Save biar nggak"
+    - "*hilang,* & follow"
+    - "buat website lainnya."
+  subtitle: "Tiap minggu aku spill **website bermanfaat, tools open-source & AI workflow** yang gratis dan langsung kepake."
+  actions:
+    - icon: bookmark
+      label: "Save postingan ini"
+      sublabel: "Biar gampang kamu buka lagi pas butuh"
+      accent: false
+    - icon: follow
+      label: "Follow @trycatchdev"
+      sublabel: "Biar nggak ketinggalan update & Part 2"
+      accent: true
+    - icon: comment
+      label: "Komen 'PART 2' di bawah"
+      sublabel: "Atau tulis website andalanmu di kolom komentar"
+      accent: false
+  handle: "@trycatchdev"
+  footer_note: "USEFUL WEBSITES · DEV & PRODUKTIVITAS"
+
+hashtags:
+  - "#websitebermanfaat"
+  - "#websitegratis"
+  - "#trycatchdev"
+  - "#produktif"
+  - "#tipsdigital"
+  - "#developerindonesia"
+  - "#techindonesia"
+
+sites:
+  - url: "https://excalidraw.com"
+    title: "Excalidraw"
+    eyebrow: "excalidraw.com"
+    description: "Whiteboard virtual gaya gambar tangan buat bikin diagram arsitektur & flowchart. Gratis, cepat, tanpa login."
+    pricing: "100% Gratis"
+    category: "Diagram"
+    command_or_url: "https://excalidraw.com"
+    footnote: "OPEN SOURCE · REAL-TIME COLLAB · EXPORT PNG/SVG"
+    footnote_accent: true
+
+  - url: "https://squoosh.app"
+    title: "Squoosh"
+    eyebrow: "squoosh.app"
+    description: "Kompres ukuran gambar sampai 80% lebih kecil tanpa bikin pecah. Jalan 100% lokal di browser, buatan Chrome Labs."
+    pricing: "100% Gratis"
+    category: "Image Tool"
+    command_or_url: "https://squoosh.app"
+    footnote: "OFFLINE READY · PRIVASI AMAN · BY GOOGLE CHROME"
+    footnote_accent: true
+
+  - url: "https://roadmap.sh"
+    title: "Roadmap.sh"
+    eyebrow: "roadmap.sh"
+    description: "Peta belajar IT interaktif & terstruktur dari nol—mulai dari Frontend, Backend, DevOps sampai AI Engineer."
+    pricing: "Gratis"
+    category: "Belajar IT"
+    command_or_url: "https://roadmap.sh"
+    footnote: "100+ ROADMAP · PANDUAN & LATIHAN · KOMUNITAS GLOBAL"
+    footnote_accent: false
+
+  - url: "https://transform.tools"
+    title: "Transform.tools"
+    eyebrow: "transform.tools"
+    description: "Konverter serba bisa di browser: ubah JSON ke TypeScript, SVG ke JSX, HTML, CSS & GraphQL dalam 1 detik."
+    pricing: "100% Gratis"
+    category: "Dev Utility"
+    command_or_url: "https://transform.tools"
+    footnote: "CLIENT-SIDE · OPEN SOURCE · TANPA LOGIN"
+    footnote_accent: true
+
+  - url: "https://ray.so"
+    title: "Ray.so"
+    eyebrow: "ray.so"
+    description: "Bikin gambar potongan kode & aset ikon yang estetik dalam hitungan detik—cocok buat konten, blog & presentasi."
+    pricing: "Gratis"
+    category: "Konten & UI"
+    dark_mode: true
+    command_or_url: "https://ray.so"
+    footnote: "BY RAYCAST · CUSTOM THEME · EXPORT PNG & SVG"
+    footnote_accent: false
