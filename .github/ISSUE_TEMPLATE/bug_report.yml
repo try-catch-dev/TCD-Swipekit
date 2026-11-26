@@ -1,0 +1,30 @@
+name: Bug Report
+description: Report an unexpected error, rendering issue, or layout bug in TCD-Swipekit.
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: textarea
+    id: description
+    attributes:
+      label: What happened?
+      description: Describe the bug clearly (attach rendered PNG screenshots if it is a visual/layout issue).
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Command & YAML to reproduce
+      description: Paste the exact `swipekit` command and minimal `deck.yaml` / `sites.yml` (remove any private tokens).
+      render: bash
+    validations:
+      required: true
+
+  - type: textarea
+    id: doctor
+    attributes:
+      label: Output of `swipekit doctor`
+      description: Run `swipekit doctor` in your terminal and paste the output here.
+      render: text
+    validations:
+      required: false

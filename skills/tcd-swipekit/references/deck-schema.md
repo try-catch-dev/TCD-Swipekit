@@ -9,8 +9,8 @@ aspect_ratio: "3:4"     # 3:4 (1180x1572) | 4:5 (1080x1350) | 9:16 (1080x1920) |
 part: 1
 
 theme:
-  preset: tcd-neon-lime # preset name or path to custom .yaml theme
-  watermark: "@trycatchdev"
+  preset: midnight-emerald # preset name or path to custom .yaml theme
+  watermark: "@yourhandle"
   watermark_position: bottom-right  # bottom-right | top-right | bottom-left
 
 cover:
@@ -39,14 +39,14 @@ outro:
       sublabel: "Keep it handy for your next build"
       accent: false
     - icon: follow
-      label: "Follow @trycatchdev"
+      label: "Follow @yourhandle"
       sublabel: "Don't miss Part 2 and weekly updates"
       accent: true
     - icon: comment
       label: "Comment 'PART 2'"
       sublabel: "Drop your favorite tool below"
       accent: false
-  handle: "@trycatchdev"
+  handle: "@yourhandle"
   footer_note: "OPEN SOURCE · AI · DEV TOOLS"
 
 items:
@@ -74,8 +74,8 @@ aspect_ratio: "3:4"
 part: 1
 
 theme:
-  preset: tcd-neon-lime
-  watermark: "@trycatchdev"
+  preset: cyber-indigo
+  watermark: "@yourhandle"
 
 cover:
   mode: gradient
@@ -88,7 +88,7 @@ outro:
   title_lines: ["Save this post", "*& follow*", "for more sites."]
   actions:
     - { icon: bookmark, label: "Save this post", sublabel: "Bookmark for later" }
-    - { icon: follow, label: "Follow @trycatchdev", sublabel: "Weekly web gems", accent: true }
+    - { icon: follow, label: "Follow @yourhandle", sublabel: "Weekly web gems", accent: true }
 
 sites:
   - url: "https://excalidraw.com"
@@ -100,3 +100,61 @@ sites:
     footnote: "OPEN SOURCE · REAL-TIME COLLAB"
     footnote_accent: true
 ```
+
+## Slide Layouts (`layout: code` & `layout: versus`)
+
+In any `deck.yaml`, mix regular `showcase` slides with `code` (syntax-highlighted code/diff) or `versus` (A-vs-B comparison) slides:
+
+```yaml
+items:
+  - source: manual
+    layout: code              # auto-inferred when `code_block:` is set
+    eyebrow: "python / refactor"
+    title: "Avoid N+1 Loops"
+    description: "Replace nested lookups with a single indexed dict."
+    code_block:
+      filename: "orders.py"
+      language: "diff"        # python, typescript, bash, diff, json, etc.
+      diff_mode: true         # highlights + (green) and - (red) lines
+      highlight_lines: [2, 3] # 1-indexed lines highlighted in theme accent
+      show_line_numbers: true
+      code: |
+        - for u in users:
+        + user = by_id.get(order["user_id"])
+
+  - source: manual
+    layout: versus            # auto-inferred when `versus:` is set
+    eyebrow: "tooling / compare"
+    title: "pip vs uv"
+    description: "Why Python teams migrate local & CI workflows to uv."
+    versus:
+      left:
+        label: "pip + venv"
+        badge: "LEGACY"
+        points: ["Slower resolution", "Multiple CLIs"]
+        code: "pip install -r requirements.txt"
+        accent: false
+      right:
+        label: "uv"
+        badge: "RECOMMENDED"
+        points: ["10-100x faster installs", "Single Rust binary"]
+        code: "uv sync --frozen"
+        accent: true
+      verdict: "Switch to uv for instant setups and faster CI."
+```
+
+## Creator Brand Profile (`.swipekit.yaml` / `~/.config/swipekit/config.yaml`)
+
+```yaml
+theme: midnight-emerald
+watermark: "@yourhandle"
+watermark_position: bottom-right
+language: en
+aspect_ratio: "3:4"
+# ratios: ["3:4", "4:5", "1:1"]
+export_pdf: false
+outro:
+  enabled: true
+  badge_text: "DONE · WANT PART 2?"
+```
+

@@ -4,13 +4,16 @@ List all available presets at any time via `swipekit themes`.
 
 ## Built-in Presets
 
-| Preset | Mode | Base Background | Primary Accent | Best For |
-| :--- | :--- | :--- | :--- | :--- |
-| `tcd-neon-lime` | Dark | `#080B10` (Deep Obsidian) | `#D4F93A` (Neon Lime) | Official Try Catch Dev brand palette (`#0D121F` cards, `#161F30` borders, `#94A3B8` slate) |
-| `midnight-emerald` | Dark | `#0B0C0F` | `#48DF76` | Classic GitHub trending aesthetic |
-| `cyber-indigo` | Dark | `#070B16` | `#38BDF8` | SaaS & useful website carousels |
-| `neon-violet` | Dark | `#0D0915` | `#C084FC` | AI, creative & design tools |
-| `editorial-light` | Light | `#F6F4EF` | `#16A34A` | Clean light magazine-style slides |
+| Preset | Mode | Base Background | Primary Accent | Typography | Best For |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| `midnight-emerald` *(default)* | Dark | `#0B0C0F` | `#48DF76` | Inter + JetBrains Mono | Classic GitHub trending & dev tools |
+| `editorial-light` | Light | `#F6F4EF` | `#16A34A` | Inter + JetBrains Mono | Clean warm magazine-style slides |
+| `arctic-slate` | Light | `#F8FAFC` | `#2563EB` | Plus Jakarta Sans + JetBrains Mono | Crisp SaaS & LinkedIn document carousels |
+| `nord-frost` | Dark | `#0E1621` | `#2DD4BF` | Plus Jakarta Sans + Fira Code | Cloud, architecture & terminal guides |
+| `cyber-indigo` | Dark | `#070B16` | `#38BDF8` | Inter + JetBrains Mono | SaaS & useful website carousels |
+| `neon-violet` | Dark | `#0D0915` | `#C084FC` | Inter + JetBrains Mono | AI, creative & design tools |
+| `amber-noir` | Dark | `#0C0A09` | `#F59E0B` | Space Grotesk + JetBrains Mono | Luxury editorial dev & AI posts |
+| `crimson-carbon` | Dark | `#09090B` | `#FB7185` | Space Grotesk + JetBrains Mono | High-contrast code audits & versus decks |
 
 ## Creating a Custom Theme YAML
 

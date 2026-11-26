@@ -41,15 +41,18 @@ swipekit generate github \
   --limit 5 \
   --since weekly \
   --lang en \
-  --theme tcd-neon-lime \
+  --theme midnight-emerald \
   --watermark "@yourhandle" \
+  --outro \
+  --ratios 3:4,4:5,1:1 \
+  --pdf \
   --output ./output/github_deck
 ```
 
-For curated editorial quality (recommended when writing custom Indonesian/English hooks, picking exact repos, or adding a Closing CTA slide), write a `deck.yaml` file and render it:
+For curated editorial quality (recommended when writing custom Indonesian/English hooks, picking exact repos, mixing `layout: code` / `layout: versus` cards, or adding a custom Closing CTA slide), write a `deck.yaml` file and render it:
 
 ```bash
-swipekit render ./my_deck.yaml --theme tcd-neon-lime --output ./output/github_deck
+swipekit render ./my_deck.yaml --theme midnight-emerald --pdf --output ./output/github_deck
 ```
 
 ### Workflow B — Useful Websites Carousel (`sites.yml`)
@@ -60,25 +63,31 @@ Create a `sites.yml` config (or scaffold one with `swipekit init sites`), then r
 swipekit generate web --sites ./sites.yml --output ./output/websites_deck
 ```
 
-`swipekit generate web` automatically launches headless Chromium via Playwright, dismisses common cookie banners, captures crisp `1280×800` desktop screenshots, extracts OpenGraph metadata, and renders the full slide bundle (`01_cover.png`, item slides, optional `closing_cta.png`, `caption.md`, `deck.yaml`, and `preview.html`).
+`swipekit generate web` automatically launches headless Chromium via Playwright, dismisses common cookie banners, captures crisp `1280×800` desktop screenshots, extracts OpenGraph metadata, and renders the full slide bundle (`01_cover.png`, item slides, optional `closing_cta.png`, optional `carousel.pdf`, `caption.md`, `deck.yaml`, and `preview.html`).
 
-### Workflow C — Custom Cover & Closing CTA
+### Workflow C — Custom Cover, Slide Layouts & Creator Brand Profile
 
 - **Cover modes:**
   - `mode: photo` + `image_path: ./cover.png` — Editorial portrait/photo seamlessly fading into the dark cover canvas.
   - `mode: gradient` — Modern dual-orb mesh gradient with architectural grid lines.
   - `mode: minimal` — Clean editorial typography-first layout.
-- **Closing CTA (`outro`):** Always include an `outro:` block in YAML when creating social media carousels so slide `N+1` prompts viewers to **Save**, **Follow**, and **Comment**.
+- **Slide layouts:**
+  - `layout: showcase` (default) — Hero screenshot / GitHub repo / website showcase.
+  - `layout: code` (`code_block:`) — Syntax-highlighted code window with optional line highlights and diff coloring (`diff_mode: true`).
+  - `layout: versus` (`versus:`) — Stacked (portrait) or side-by-side (`1:1`) A-vs-B comparison card with verdict bar.
+- **Closing CTA (`outro`):** Pass `--outro` on the CLI or include an `outro:` block in YAML so slide `N+1` prompts viewers to **Save**, **Follow**, and **Comment**.
+- **Creator Brand Profile:** Run `swipekit init profile` (`.swipekit.yaml` or `--global`) to store default theme, watermark, language, cover photo, and outro once.
 
-See [references/deck-schema.md](references/deck-schema.md) for full `deck.yaml`, `sites.yml`, and `outro` fields, and [references/brand-themes.md](references/brand-themes.md) for all built-in theme presets (`tcd-neon-lime`, `midnight-emerald`, `cyber-indigo`, `neon-violet`, `editorial-light`) and custom `.yaml` theme overrides.
+See [references/deck-schema.md](references/deck-schema.md) for full `deck.yaml`, `sites.yml`, `code_block`, `versus`, `outro`, and profile fields, and [references/brand-themes.md](references/brand-themes.md) for all built-in theme presets (`midnight-emerald`, `cyber-indigo`, `neon-violet`, `editorial-light`) and custom `.yaml` theme overrides (including dynamic Google Fonts and local `font_files`).
 
 ## 3. Output Artifacts
 
 Every run outputs:
 - `01_cover.png` … `NN_<slug>.png` (+ optional `NN_closing_cta.png`)
+- `carousel.pdf` (when `--pdf` is enabled — ready for LinkedIn Document Carousels)
 - `caption.md` — Ready-to-paste social media caption, hashtags, and numbered links
 - `deck.yaml` — Editable snapshot for fast re-renders (`swipekit render deck.yaml`)
-- `preview.html` — Interactive keyboard-navigable browser preview
+- `preview.html` — Interactive keyboard-navigable browser preview with toggleable TikTok / IG Reels / IG Carousel / LinkedIn Safe-Zone overlays
 
 ## 4. Visual Quality Checklist (Important for Agents)
 

@@ -1,0 +1,27 @@
+name: Feature Request
+description: Suggest a new slide layout, theme preset, content source, or CLI improvement.
+title: "[Feature]: "
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem or use case
+      description: What workflow or social media format are you trying to build?
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: Describe the CLI flags, YAML schema, or visual layout you envision.
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: contribute
+    attributes:
+      label: Contribution
+      options:
+        - label: I would be happy to submit a Pull Request for this feature
