@@ -114,6 +114,33 @@ sites:
 
 ---
 
+## Install as an AI Agent Skill
+
+TCD-Swipekit follows the **Agent Skills Open Standard** (`skills/tcd-swipekit/SKILL.md`), compatible with **Antigravity, Claude Code, Codex, Cursor, Gemini CLI, and GitHub Copilot**.
+
+### Option 1 — Via `skills` CLI (`npx`)
+
+```bash
+npx skills add try-catch-dev/TCD-Swipekit
+```
+
+### Option 2 — Via Built-in `swipekit skill install`
+
+```bash
+# Install for a specific agent (antigravity, claude, codex, cursor, gemini, copilot, agents)
+swipekit skill install --agent antigravity
+swipekit skill install --agent claude
+swipekit skill install --agent cursor
+
+# Or install across all global agent skill directories at once
+swipekit skill install --agent all
+
+# Inspect the bundled SKILL.md
+swipekit skill show
+```
+
+---
+
 ## Optional AI Copywriting
 
 TCD-Swipekit runs **100% without API keys** by default. If you want an LLM to rewrite/shorten descriptions for social media punchiness:

@@ -57,6 +57,9 @@ Issues = "https://github.com/try-catch-dev/TCD-Swipekit/issues"
 [tool.hatch.build.targets.wheel]
 packages = ["src/tcd_swipekit"]
 
+[tool.hatch.build.targets.wheel.force-include]
+"skills/tcd-swipekit" = "tcd_swipekit/skill_data/tcd-swipekit"
+
 [tool.ruff]
 line-length = 100
 target-version = "py310"

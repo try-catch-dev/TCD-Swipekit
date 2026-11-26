@@ -12,6 +12,7 @@ from rich.table import Table
 from tcd_swipekit import __version__
 from tcd_swipekit.models import AspectRatio, CoverMode, Language, WatermarkPosition
 from tcd_swipekit.pipeline import generate_github_deck, generate_website_deck, render_deck_file
+from tcd_swipekit.skill_installer import get_bundled_skill_dir, install_skill
 from tcd_swipekit.themes.loader import list_presets, load_theme
 
 app = typer.Typer(
@@ -20,7 +21,9 @@ app = typer.Typer(
     no_args_is_help=True,
 )
 generate_app = typer.Typer(help="Generate a carousel deck from a content source.", no_args_is_help=True)
+skill_app = typer.Typer(help="Install or inspect the TCD-Swipekit AI Agent Skill.", no_args_is_help=True)
 app.add_typer(generate_app, name="generate")
+app.add_typer(skill_app, name="skill")
 
 console = Console()
 
@@ -262,3 +265,43 @@ def show_themes() -> None:
             "Yes" if cfg.ambient_blur else "No",
         )
     console.print(table)
+
+
+@skill_app.command("install")
+def skill_install(
+    agent: Annotated[
+        str,
+        typer.Option(
+            "--agent",
+            "-a",
+            help="Target AI agent: antigravity, claude, codex, cursor, gemini, copilot, agents, or all.",
+        ),
+    ] = "antigravity",
+    target: Annotated[
+        Path | None,
+        typer.Option("--target", "-t", help="Custom destination directory (overrides --agent)."),
+    ] = None,
+    overwrite: Annotated[
+        bool,
+        typer.Option("--overwrite/--no-overwrite", help="Overwrite existing skill directory if present."),
+    ] = True,
+) -> None:
+    """Install the TCD-Swipekit Agent Skill (SKILL.md + references) for AI coding agents."""
+    try:
+        installed = install_skill(agent=agent, target_dir=target, overwrite=overwrite)
+    except (ValueError, FileExistsError, FileNotFoundError) as exc:
+        console.print(f"[bold red]Error:[/bold red] {exc}")
+        raise typer.Exit(code=1) from exc
+
+    console.print("[bold green]Installed TCD-Swipekit Agent Skill to:[/bold green]")
+    for dest in installed:
+        console.print(f"  • {dest}")
+
+
+@skill_app.command("show")
+def skill_show() -> None:
+    """Print the path and contents of the bundled SKILL.md."""
+    skill_dir = get_bundled_skill_dir()
+    skill_md = skill_dir / "SKILL.md"
+    console.print(f"[bold cyan]Skill directory:[/bold cyan] {skill_dir}\n")
+    console.print(skill_md.read_text(encoding="utf-8"))
