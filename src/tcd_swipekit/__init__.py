@@ -43,6 +43,12 @@ from tcd_swipekit.plugins import (
     register_layout,
     register_source,
 )
+from tcd_swipekit.skill_installer import (
+    auto_sync_installed_skills,
+    get_skill_status,
+    install_skill,
+    update_skill,
+)
 from tcd_swipekit.themes.loader import register_template_dir, register_theme_dir
 
 __version__ = "0.2.0"
@@ -71,13 +77,16 @@ __all__ = [
     "VersusBlock",
     "VersusSide",
     "WatermarkPosition",
+    "auto_sync_installed_skills",
     "generate_custom_source_deck",
     "generate_github_deck",
     "generate_markdown_deck",
     "generate_website_deck",
     "get_exporter",
     "get_layout",
+    "get_skill_status",
     "get_source_class",
+    "install_skill",
     "list_exporters",
     "list_layouts",
     "list_sources",
@@ -88,4 +97,5 @@ __all__ = [
     "register_template_dir",
     "register_theme_dir",
     "render_deck_file",
+    "update_skill",
 ]

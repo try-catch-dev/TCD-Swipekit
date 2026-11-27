@@ -20,13 +20,15 @@ Verify `swipekit` is installed before generating slides:
 ```bash
 swipekit --version
 swipekit themes
+swipekit skill status
 ```
 
-If `swipekit` is not installed yet:
+If `swipekit` is not installed yet (or to update the installed skill to the latest version):
 
 ```bash
-pip install git+https://github.com/try-catch-dev/TCD-Swipekit.git
+pip install -U git+https://github.com/try-catch-dev/TCD-Swipekit.git
 playwright install chromium
+swipekit skill update --remote
 ```
 
 ## 2. Choose the Right Workflow

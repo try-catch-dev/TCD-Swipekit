@@ -282,6 +282,7 @@ class CreatorProfile(BaseModel):
     outro: OutroConfig | None = None
     export_pdf: bool | None = None
     export_gif: bool | None = None
+    auto_update_skill: bool | None = None
     hashtags: list[str] | None = None
 
 

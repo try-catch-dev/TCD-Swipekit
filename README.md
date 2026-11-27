@@ -346,14 +346,16 @@ swipekit generate custom hn-top \
 | `swipekit plugins` | List all registered sources, slide layouts, exporters & search paths |
 | `swipekit profile` | Show active Creator Brand Profile & resolved defaults |
 | `swipekit themes` | List available theme presets (built-in + user directories) |
-| `swipekit doctor` | Verify Python, Chromium/Playwright, dependencies, registry & optional tokens |
-| `swipekit skill install --agent <name>` | Install the TCD-Swipekit AI Agent Skill |
+| `swipekit doctor` | Verify Python, Chromium/Playwright, dependencies, registry & skill status |
+| `swipekit skill install --agent <name>` | Install the TCD-Swipekit AI Agent Skill (`antigravity`, `claude`, `cursor`, `all`, etc.) |
+| `swipekit skill update [--remote]` | Update all installed Agent Skills from local package or remote GitHub (`swipekit update`) |
+| `swipekit skill status` | Check installation & SHA-256 sync status across all AI coding agents |
 
 **Shared Flags:** `--ratios 3:4,4:5,1:1` (or `all`) · `--pdf` · `--gif` · `--export <name>` · `--outro / --no-outro` · `--theme <preset|file.yaml>` · `--lang en|id` · `--watermark "@handle"` · `--plugin <file.py>` · `--profile <file>` · `--no-profile` · `--ai`
 
 ---
 
-## Install as an AI Agent Skill
+## Install & Auto-Update as an AI Agent Skill
 
 TCD-Swipekit follows the **Agent Skills Open Standard** ([`skills/tcd-swipekit/SKILL.md`](skills/tcd-swipekit/SKILL.md)), compatible with **Antigravity, Claude Code, Codex, Cursor, Gemini CLI, and GitHub Copilot**.
 
@@ -362,9 +364,15 @@ TCD-Swipekit follows the **Agent Skills Open Standard** ([`skills/tcd-swipekit/S
 npx skills add try-catch-dev/TCD-Swipekit
 
 # Option 2 — Via built-in swipekit CLI
-swipekit skill install --agent antigravity   # or claude, codex, cursor, gemini, copilot, all
-swipekit skill show
+swipekit skill install --agent antigravity   # or gemini, claude, codex, cursor, copilot, all
+swipekit skill status
+
+# Update all installed agent skills (from local package or directly from GitHub!)
+swipekit skill update
+swipekit skill update --remote               # or shortcut: swipekit update --remote
 ```
+
+> **Automatic Skill Sync:** Whenever you upgrade `tcd-swipekit` (`git pull` or `pip install -U tcd-swipekit`), running any `swipekit` command automatically checks the SHA-256 content digest of your installed Agent Skills and silently syncs outdated `SKILL.md` / `references/` in-place (disable anytime with `auto_update_skill: false` in `.swipekit.yaml` or `SWIPEKIT_NO_AUTO_SKILL_UPDATE=1`).
 
 ---
 

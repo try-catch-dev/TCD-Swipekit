@@ -29,7 +29,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Dynamic Google Fonts & Offline Local Fonts (`font_files`)**: Automatically loads fonts declared in `ThemeConfig` or embeds local `.woff2`/`.ttf`/`.otf` files via `@font-face`.
 - **Creator Brand Profile (`.swipekit.yaml` / `~/.config/swipekit/config.yaml`)**: Reusable defaults with `swipekit init profile` and `swipekit profile`.
 - **4 New Built-in Themes**: `arctic-slate`, `nord-frost`, `amber-noir`, and `crimson-carbon` (8 dark & light themes total).
-- **`swipekit doctor` Command**: Instant environment diagnostics for Python, Playwright/Chromium, Pillow, Pygments, plugin registry, profiles, and optional tokens.
+- **`swipekit doctor` Command**: Instant environment diagnostics for Python, Playwright/Chromium, Pillow, Pygments, plugin registry, installed Agent Skills, profiles, and optional tokens.
+- **Agent Skill Updater & Auto-Sync (`swipekit skill update`, `swipekit skill status`, `swipekit update`)**:
+  - Tracks SHA-256 content digests and `.swipekit-skill.json` metadata stamps across all installed AI agent skill directories (`antigravity`, `gemini`, `claude`, `codex`, `cursor`, `copilot`, `agents`).
+  - Supports `--remote` to pull the latest `SKILL.md` and `references/` straight from GitHub without waiting for a package upgrade.
+  - Automatically syncs outdated installed Agent Skills whenever `swipekit` commands run (`auto_update_skill: true` by default).
 
 ### Changed
 - Neutralized open-source defaults (`midnight-emerald` default preset, `editorial-light` README showcase, `@yourhandle` placeholder) and removed personal brand preset files.

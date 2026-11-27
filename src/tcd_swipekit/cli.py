@@ -28,7 +28,14 @@ from tcd_swipekit.plugins import (
     load_plugin_file,
 )
 from tcd_swipekit.profile import GLOBAL_PROFILE_PATHS, STARTER_PROFILE_YAML, load_profile
-from tcd_swipekit.skill_installer import get_bundled_skill_dir, install_skill
+from tcd_swipekit.skill_installer import (
+    DEFAULT_GITHUB_REPO,
+    auto_sync_installed_skills,
+    get_bundled_skill_dir,
+    get_skill_status,
+    install_skill,
+    update_skill,
+)
 from tcd_swipekit.themes.loader import (
     get_template_search_dirs,
     get_theme_search_dirs,
@@ -43,7 +50,7 @@ app = typer.Typer(
     no_args_is_help=True,
 )
 generate_app = typer.Typer(help="Generate a carousel deck from a content source.", no_args_is_help=True)
-skill_app = typer.Typer(help="Install or inspect the TCD-Swipekit AI Agent Skill.", no_args_is_help=True)
+skill_app = typer.Typer(help="Install, update, or inspect the TCD-Swipekit AI Agent Skill.", no_args_is_help=True)
 app.add_typer(generate_app, name="generate")
 app.add_typer(skill_app, name="skill")
 
@@ -90,10 +97,17 @@ def _resolve_cli_profile(
     no_profile: bool,
 ) -> tuple[CreatorProfile | None, Path | None]:
     try:
-        return load_profile(explicit_path=profile_path, enabled=not no_profile)
+        loaded, path = load_profile(explicit_path=profile_path, enabled=not no_profile)
     except (FileNotFoundError, ValueError) as exc:
         console.print(f"[bold red]Profile error:[/bold red] {exc}")
         raise typer.Exit(code=1) from exc
+
+    auto_enabled = True if (loaded is None or loaded.auto_update_skill is None) else loaded.auto_update_skill
+    synced = auto_sync_installed_skills(enabled=auto_enabled)
+    for dest in synced:
+        console.print(f"[dim]Auto-updated Agent Skill: {dest}[/dim]")
+
+    return loaded, path
 
 
 def _resolve_cli_ratios(ratios_raw: str | None) -> list[AspectRatio] | None:
@@ -853,6 +867,25 @@ def doctor() -> None:
         f"{len(list_sources())} sources · {len(list_layouts())} layouts · {len(list_exporters())} exporters",
     )
 
+    # Agent Skill installation & auto-sync check
+    synced_skills = auto_sync_installed_skills()
+    skill_rows = get_skill_status()
+    installed_skills = [r for r in skill_rows if r["installed"]]
+    if installed_skills:
+        agents_str = ", ".join(str(r["agent"]) for r in installed_skills)
+        sync_note = f" (auto-updated {len(synced_skills)})" if synced_skills else " (up to date)"
+        table.add_row(
+            "Agent Skill (SKILL.md)",
+            "[bold green]OK[/bold green]",
+            f"Installed for: {agents_str}{sync_note}",
+        )
+    else:
+        table.add_row(
+            "Agent Skill (SKILL.md)",
+            "[dim]INFO[/dim]",
+            "Not installed globally (optional — run: swipekit skill install)",
+        )
+
     # Creator Brand Profile
     profile_path = find_profile_path()
     if profile_path:
@@ -915,7 +948,7 @@ def skill_install(
         typer.Option(
             "--agent",
             "-a",
-            help="Target AI agent: antigravity, claude, codex, cursor, gemini, copilot, agents, or all.",
+            help="Target AI agent: antigravity, gemini, claude, codex, cursor, copilot, agents, or all.",
         ),
     ] = "antigravity",
     target: Annotated[
@@ -939,6 +972,107 @@ def skill_install(
         console.print(f"  • {dest}")
 
 
+@skill_app.command("update")
+def skill_update_cmd(
+    agent: Annotated[
+        str | None,
+        typer.Option(
+            "--agent",
+            "-a",
+            help="Specific AI agent to update (default: auto-detect all installed agents).",
+        ),
+    ] = None,
+    target: Annotated[
+        Path | None,
+        typer.Option("--target", "-t", help="Custom destination directory."),
+    ] = None,
+    remote: Annotated[
+        bool,
+        typer.Option("--remote", "-r", help="Fetch latest SKILL.md & references directly from GitHub."),
+    ] = False,
+    repo: Annotated[
+        str,
+        typer.Option("--repo", help="GitHub owner/repo when using --remote."),
+    ] = DEFAULT_GITHUB_REPO,
+    branch: Annotated[
+        str,
+        typer.Option("--branch", help="GitHub branch or tag when using --remote."),
+    ] = "main",
+    force: Annotated[
+        bool,
+        typer.Option("--force", "-f", help="Force update even if content digest already matches."),
+    ] = False,
+) -> None:
+    """Update installed TCD-Swipekit Agent Skill(s) from the local package or remote GitHub repo."""
+    try:
+        results = update_skill(
+            agent=agent,
+            target_dir=target,
+            remote=remote,
+            repo=repo,
+            branch=branch,
+            force=force,
+        )
+    except Exception as exc:
+        console.print(f"[bold red]Skill update error:[/bold red] {exc}")
+        raise typer.Exit(code=1) from exc
+
+    table = Table(title="TCD-Swipekit Agent Skill Update")
+    table.add_column("Action", style="bold")
+    table.add_column("Version")
+    table.add_column("Digest (SHA-256)")
+    table.add_column("Source")
+    table.add_column("Destination Path")
+
+    for res in results:
+        act = str(res["action"])
+        if act == "updated":
+            badge = "[bold green]UPDATED[/bold green]"
+        elif act == "installed":
+            badge = "[bold cyan]INSTALLED[/bold cyan]"
+        else:
+            badge = "[dim]UP TO DATE[/dim]"
+        table.add_row(
+            badge,
+            f"v{res['version']}",
+            str(res["sha256"]),
+            str(res["source"]),
+            str(res["path"]),
+        )
+    console.print(table)
+
+
+@skill_app.command("status")
+def skill_status_cmd() -> None:
+    """Check installation & sync status of the TCD-Swipekit Agent Skill across all AI coding agents."""
+    rows = get_skill_status()
+    bundled_ver = rows[0]["bundled_version"] if rows else __version__
+    bundled_sha = rows[0]["bundled_sha256"] if rows else ""
+
+    table = Table(title=f"TCD-Swipekit Agent Skill Status (Bundled: v{bundled_ver} · {bundled_sha})")
+    table.add_column("Agent", style="bold cyan")
+    table.add_column("Status")
+    table.add_column("Installed Digest")
+    table.add_column("Source")
+    table.add_column("Path")
+
+    for row in rows:
+        if not row["installed"]:
+            status_str = "[dim]Not installed[/dim]"
+        elif row["up_to_date"]:
+            status_str = "[bold green]Up to date[/bold green]"
+        else:
+            status_str = "[bold yellow]Outdated (run: swipekit skill update)[/bold yellow]"
+        table.add_row(
+            str(row["agent"]),
+            status_str,
+            str(row["installed_sha256"] or "—"),
+            str(row["source"] or ("bundled" if row["installed"] else "—")),
+            str(row["path"]),
+        )
+    console.print(table)
+
+
 @skill_app.command("show")
 def skill_show() -> None:
     """Print the path and contents of the bundled SKILL.md."""
@@ -946,3 +1080,22 @@ def skill_show() -> None:
     skill_md = skill_dir / "SKILL.md"
     console.print(f"[bold cyan]Skill directory:[/bold cyan] {skill_dir}\n")
     console.print(skill_md.read_text(encoding="utf-8"))
+
+
+@app.command("update")
+def top_level_update(
+    agent: Annotated[
+        str | None,
+        typer.Option("--agent", "-a", help="Specific AI agent to update (default: all installed agents)."),
+    ] = None,
+    remote: Annotated[
+        bool,
+        typer.Option("--remote", "-r", help="Fetch latest SKILL.md & references directly from GitHub."),
+    ] = False,
+    force: Annotated[
+        bool,
+        typer.Option("--force", "-f", help="Force update even if content digest already matches."),
+    ] = False,
+) -> None:
+    """Shortcut for `swipekit skill update` — syncs all installed AI Agent Skills to the latest version."""
+    skill_update_cmd(agent=agent, target=None, remote=remote, repo=DEFAULT_GITHUB_REPO, branch="main", force=force)
