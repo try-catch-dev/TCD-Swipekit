@@ -22,9 +22,11 @@ from tcd_swipekit.models import (
     OutroConfig,
     WatermarkPosition,
 )
+from tcd_swipekit.plugins import get_source_class
 from tcd_swipekit.renderer import SlideRenderer
 from tcd_swipekit.sources.github import GitHubSource
 from tcd_swipekit.sources.manual import ManualDeckSource, load_deck_yaml
+from tcd_swipekit.sources.markdown import MarkdownSource
 from tcd_swipekit.sources.website import WebsiteSource, load_sites_file
 from tcd_swipekit.themes.loader import load_theme
 
@@ -92,18 +94,28 @@ def _render_with_ratios(
     output_dir: Path,
     ratios: list[AspectRatio] | None,
     export_pdf: bool,
+    export_gif: bool = False,
+    exporters: list[str] | None = None,
 ) -> list[Path]:
     renderer = SlideRenderer()
     target_ratios = ratios or [deck.aspect_ratio]
     if len(target_ratios) == 1:
         single_deck = deck.model_copy(update={"aspect_ratio": target_ratios[0]})
-        return renderer.render_deck(single_deck, output_dir=output_dir, export_pdf=export_pdf)
+        return renderer.render_deck(
+            single_deck,
+            output_dir=output_dir,
+            export_pdf=export_pdf,
+            export_gif=export_gif,
+            exporters=exporters,
+        )
 
     by_ratio = renderer.render_multi_ratio(
         deck,
         output_dir=output_dir,
         ratios=target_ratios,
         export_pdf=export_pdf,
+        export_gif=export_gif,
+        exporters=exporters,
     )
     flattened: list[Path] = []
     for ratio_paths in by_ratio.values():
@@ -133,6 +145,8 @@ def generate_github_deck(
     cover_cta: str | None = None,
     include_outro: bool | None = None,
     export_pdf: bool | None = None,
+    export_gif: bool | None = None,
+    exporters: list[str] | None = None,
     use_ai: bool = False,
     cache_dir: Path | None = None,
     profile: CreatorProfile | None = None,
@@ -171,6 +185,11 @@ def generate_github_deck(
         export_pdf
         if export_pdf is not None
         else (bool(profile.export_pdf) if profile and profile.export_pdf is not None else False)
+    )
+    effective_gif = (
+        export_gif
+        if export_gif is not None
+        else (bool(profile.export_gif) if profile and profile.export_gif is not None else False)
     )
 
     cache = cache_dir or (output_dir / ".cache")
@@ -223,6 +242,8 @@ def generate_github_deck(
         output_dir=output_dir,
         ratios=effective_ratios,
         export_pdf=effective_pdf,
+        export_gif=effective_gif,
+        exporters=exporters,
     )
     return deck, paths
 
@@ -245,6 +266,8 @@ def generate_website_deck(
     cover_image: Path | None = None,
     include_outro: bool | None = None,
     export_pdf: bool | None = None,
+    export_gif: bool | None = None,
+    exporters: list[str] | None = None,
     use_ai: bool = False,
     cache_dir: Path | None = None,
     profile: CreatorProfile | None = None,
@@ -336,6 +359,11 @@ def generate_website_deck(
         if export_pdf is not None
         else (bool(profile.export_pdf) if profile and profile.export_pdf is not None else False)
     )
+    effective_gif = (
+        export_gif
+        if export_gif is not None
+        else (bool(profile.export_gif) if profile and profile.export_gif is not None else False)
+    )
 
     deck = DeckSpec(
         topic=effective_topic,
@@ -357,6 +385,238 @@ def generate_website_deck(
         output_dir=output_dir,
         ratios=effective_ratios,
         export_pdf=effective_pdf,
+        export_gif=effective_gif,
+        exporters=exporters,
+    )
+    return deck, paths
+
+
+def generate_markdown_deck(
+    *,
+    markdown_source: Path | str,
+    output_dir: Path,
+    limit: int = 10,
+    topic: str | None = None,
+    language: Language | None = None,
+    aspect_ratio: AspectRatio | None = None,
+    ratios: list[AspectRatio] | None = None,
+    part: int | None = None,
+    theme_name: str | None = None,
+    accent_color: str | None = None,
+    watermark: str | None = None,
+    watermark_position: WatermarkPosition | None = None,
+    cover_mode: CoverMode | None = None,
+    cover_image: Path | None = None,
+    cover_badge: str | None = None,
+    cover_cta: str | None = None,
+    include_outro: bool | None = None,
+    export_pdf: bool | None = None,
+    export_gif: bool | None = None,
+    exporters: list[str] | None = None,
+    use_ai: bool = False,
+    cache_dir: Path | None = None,
+    profile: CreatorProfile | None = None,
+) -> tuple[DeckSpec, list[Path]]:
+    """Convert a Markdown article, tutorial, or doc file/URL into a multi-layout carousel deck."""
+    effective_lang = language or (profile.language if profile and profile.language else Language.EN)
+    cache = cache_dir or (output_dir / ".cache")
+    source = MarkdownSource(cache_dir=cache, language=effective_lang)
+    deck = source.build_deck(markdown_source, limit=limit)
+
+    if topic:
+        deck.topic = topic
+    if language:
+        deck.language = language
+    if part is not None:
+        deck.part = part
+
+    effective_ratio = aspect_ratio or (
+        profile.aspect_ratio if profile and profile.aspect_ratio else deck.aspect_ratio
+    )
+    effective_ratios = ratios or (
+        [aspect_ratio]
+        if aspect_ratio is not None
+        else (profile.ratios if profile and profile.ratios else [effective_ratio])
+    )
+    deck.aspect_ratio = effective_ratios[0]
+
+    effective_theme_name = theme_name or (
+        profile.theme if profile and profile.theme else "midnight-emerald"
+    )
+    effective_accent = accent_color or (profile.accent_color if profile else None)
+    effective_watermark = watermark if watermark is not None else (
+        profile.watermark if profile else None
+    )
+    effective_wm_pos = watermark_position or (
+        profile.watermark_position if profile else None
+    )
+    deck.theme = load_theme(
+        effective_theme_name,
+        overrides=_build_theme_overrides(effective_accent, effective_watermark, effective_wm_pos),
+    )
+
+    if cover_image:
+        deck.cover.image_path = str(cover_image.resolve())
+        deck.cover.mode = cover_mode or CoverMode.PHOTO
+    elif profile and profile.cover_image:
+        deck.cover.image_path = profile.cover_image
+        deck.cover.mode = cover_mode or profile.cover_mode or CoverMode.PHOTO
+    elif cover_mode:
+        deck.cover.mode = cover_mode
+
+    if cover_badge:
+        deck.cover.badge_text = cover_badge
+    if cover_cta:
+        deck.cover.cta_text = cover_cta
+
+    deck.outro = _resolve_outro(
+        include_outro=include_outro,
+        file_outro=deck.outro,
+        profile=profile,
+        language=deck.language,
+        handle=deck.theme.watermark,
+        part=deck.part,
+    )
+    if not deck.hashtags and profile and profile.hashtags:
+        deck.hashtags = list(profile.hashtags)
+
+    effective_pdf = (
+        export_pdf
+        if export_pdf is not None
+        else (bool(profile.export_pdf) if profile and profile.export_pdf is not None else False)
+    )
+    effective_gif = (
+        export_gif
+        if export_gif is not None
+        else (bool(profile.export_gif) if profile and profile.export_gif is not None else False)
+    )
+
+    deck = populate_cover_defaults(deck, source_kind="github")
+    if use_ai:
+        deck = maybe_enhance_with_ai(deck)
+
+    paths = _render_with_ratios(
+        deck=deck,
+        output_dir=output_dir,
+        ratios=effective_ratios,
+        export_pdf=effective_pdf,
+        export_gif=effective_gif,
+        exporters=exporters,
+    )
+    return deck, paths
+
+
+def generate_custom_source_deck(
+    *,
+    source_name: str,
+    output_dir: Path,
+    source_kwargs: dict[str, Any] | None = None,
+    limit: int = 6,
+    topic: str | None = None,
+    language: Language | None = None,
+    aspect_ratio: AspectRatio | None = None,
+    ratios: list[AspectRatio] | None = None,
+    part: int = 1,
+    theme_name: str | None = None,
+    accent_color: str | None = None,
+    watermark: str | None = None,
+    watermark_position: WatermarkPosition | None = None,
+    cover_mode: CoverMode | None = None,
+    cover_image: Path | None = None,
+    include_outro: bool | None = None,
+    export_pdf: bool | None = None,
+    export_gif: bool | None = None,
+    exporters: list[str] | None = None,
+    use_ai: bool = False,
+    cache_dir: Path | None = None,
+    profile: CreatorProfile | None = None,
+) -> tuple[DeckSpec, list[Path]]:
+    """Invoke any registered custom BaseSource plugin by name and render a carousel deck."""
+    effective_lang = language or (profile.language if profile and profile.language else Language.EN)
+    cache = cache_dir or (output_dir / ".cache")
+    source_cls = get_source_class(source_name)
+    source = source_cls(cache_dir=cache, language=effective_lang)
+    items = source.fetch_items(limit=limit, **(source_kwargs or {}))
+
+    effective_ratio = aspect_ratio or (
+        profile.aspect_ratio if profile and profile.aspect_ratio else AspectRatio.PORTRAIT_3_4
+    )
+    effective_ratios = ratios or (
+        [aspect_ratio]
+        if aspect_ratio is not None
+        else (profile.ratios if profile and profile.ratios else [effective_ratio])
+    )
+    effective_theme_name = theme_name or (
+        profile.theme if profile and profile.theme else "midnight-emerald"
+    )
+    effective_accent = accent_color or (profile.accent_color if profile else None)
+    effective_watermark = watermark if watermark is not None else (
+        profile.watermark if profile else None
+    )
+    effective_wm_pos = watermark_position or (
+        profile.watermark_position if profile else None
+    )
+    theme = load_theme(
+        effective_theme_name,
+        overrides=_build_theme_overrides(effective_accent, effective_watermark, effective_wm_pos),
+    )
+
+    effective_cover_image: str | None = (
+        str(cover_image.resolve())
+        if cover_image
+        else (profile.cover_image if profile else None)
+    )
+    resolved_cover_mode = (
+        cover_mode
+        or (CoverMode.PHOTO if effective_cover_image else None)
+        or (profile.cover_mode if profile and profile.cover_mode else CoverMode.GRADIENT)
+    )
+    cover = CoverConfig(
+        mode=resolved_cover_mode,
+        image_path=effective_cover_image,
+        badge_icon="sparkles",
+    )
+    outro = _resolve_outro(
+        include_outro=include_outro,
+        file_outro=None,
+        profile=profile,
+        language=effective_lang,
+        handle=theme.watermark,
+        part=part,
+    )
+    effective_pdf = (
+        export_pdf
+        if export_pdf is not None
+        else (bool(profile.export_pdf) if profile and profile.export_pdf is not None else False)
+    )
+    effective_gif = (
+        export_gif
+        if export_gif is not None
+        else (bool(profile.export_gif) if profile and profile.export_gif is not None else False)
+    )
+
+    deck = DeckSpec(
+        topic=topic or f"{source_name.title()} Highlights",
+        language=effective_lang,
+        aspect_ratio=effective_ratios[0],
+        part=part,
+        theme=theme,
+        cover=cover,
+        outro=outro,
+        items=items,
+        hashtags=list(profile.hashtags) if profile and profile.hashtags else [],
+    )
+    deck = populate_cover_defaults(deck, source_kind="github")
+    if use_ai:
+        deck = maybe_enhance_with_ai(deck)
+
+    paths = _render_with_ratios(
+        deck=deck,
+        output_dir=output_dir,
+        ratios=effective_ratios,
+        export_pdf=effective_pdf,
+        export_gif=effective_gif,
+        exporters=exporters,
     )
     return deck, paths
 
@@ -375,6 +635,8 @@ def render_deck_file(
     ratios: list[AspectRatio] | None = None,
     include_outro: bool | None = None,
     export_pdf: bool | None = None,
+    export_gif: bool | None = None,
+    exporters: list[str] | None = None,
     cache_dir: Path | None = None,
     profile: CreatorProfile | None = None,
 ) -> tuple[DeckSpec, list[Path]]:
@@ -463,6 +725,11 @@ def render_deck_file(
         if export_pdf is not None
         else (bool(profile.export_pdf) if profile and profile.export_pdf is not None else False)
     )
+    effective_gif = (
+        export_gif
+        if export_gif is not None
+        else (bool(profile.export_gif) if profile and profile.export_gif is not None else False)
+    )
 
     manual_source = ManualDeckSource(cache_dir=cache, language=deck.language)
     deck = manual_source.enrich_deck(deck, base_dir=deck_file.parent)
@@ -474,5 +741,7 @@ def render_deck_file(
         output_dir=output_dir,
         ratios=effective_ratios,
         export_pdf=effective_pdf,
+        export_gif=effective_gif,
+        exporters=exporters,
     )
     return deck, paths

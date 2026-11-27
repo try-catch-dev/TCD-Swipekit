@@ -124,3 +124,31 @@ items:
       - { text: "MIT / Apache-2.0", style: "glass" }
     footnote: "DOCS.ASTRAL.SH/UV"
     footnote_accent: true
+
+  - source: manual
+    layout: checklist
+    eyebrow: "release / audit"
+    title: "Pre-Ship Checklist"
+    description: "Four essential checks before deploying any Python service to production."
+    checklist:
+      numbered: true
+      items:
+        - title: "Lock all dependencies"
+          detail: "Commit uv.lock or hashed requirements for deterministic builds."
+          badge: "CI/CD"
+          accent: true
+        - title: "Enforce Ruff & type checks"
+          detail: "Block merges on lint or type regressions in GitHub Actions."
+          badge: "QUALITY"
+        - title: "Set explicit HTTP timeouts"
+          detail: "Never allow unbounded network calls in request handlers."
+          badge: "RELIABILITY"
+        - title: "Structured JSON logging"
+          detail: "Attach trace_id and latency_ms to every request log entry."
+          badge: "OBSERVABILITY"
+      summary: "Automate all 4 steps in your CI pipeline so zero checks are skipped."
+    badges:
+      - { text: "Production Ready", style: "accent" }
+      - { text: "4 Steps", style: "glass" }
+    footnote: "SAVE THIS CHECKLIST FOR YOUR NEXT PR"
+    footnote_accent: true

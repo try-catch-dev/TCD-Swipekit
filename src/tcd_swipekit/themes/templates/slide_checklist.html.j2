@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<style>
+{{ font_css | safe }}
+
+:root {
+  --w: {{ width }}px;
+  --h: {{ height }}px;
+  --scale: {{ scale }};
+  --bg: {{ theme.bg_color }};
+  --text: {{ theme.text_color }};
+  --muted: {{ theme.muted_color }};
+  --subtle: {{ theme.subtle_color }};
+  --divider: {{ theme.divider_color }};
+  --accent: {{ theme.accent_color }};
+  --accent-text: {{ theme.accent_text_color }};
+  --pill-accent-bg: {{ theme.pill_accent_bg }};
+  --pill-accent-text: {{ theme.pill_accent_text }};
+  --pill-glass-bg: {{ theme.pill_glass_bg }};
+  --pill-glass-border: {{ theme.pill_glass_border }};
+  --cli-bg: {{ theme.cli_bg }};
+  --cli-border: {{ theme.cli_border }};
+  --cli-text: {{ theme.cli_text }};
+  --radius: {{ theme.card_radius }}px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  width: var(--w);
+  height: var(--h);
+  overflow: hidden;
+  background: var(--bg);
+  font-family: '{{ theme.font_body }}', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  color: var(--text);
+}
+
+.canvas {
+  position: relative;
+  width: var(--w);
+  height: var(--h);
+  background: var(--bg);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  padding: calc(72px * var(--scale)) calc(82px * var(--scale)) calc(68px * var(--scale)) calc(82px * var(--scale));
+}
+
+.progress-track {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: calc(7px * var(--scale));
+  background: var(--divider);
+  z-index: 25;
+}
+
+.progress-fill {
+  height: 100%;
+  width: {{ progress_percent }}%;
+  background: var(--accent);
+}
+
+.ambient-glow {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 86% 18%, {{ theme.accent_color }}{{ '24' if not theme.is_light else '16' }} 0%, transparent 46%),
+    radial-gradient(circle at 14% 84%, {{ theme.pill_accent_bg }}{{ '1C' if not theme.is_light else '10' }} 0%, transparent 48%);
+  z-index: 0;
+}
+
+.inner {
+  position: relative;
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.top-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: calc(22px * var(--scale));
+}
+
+.num-group {
+  display: flex;
+  align-items: baseline;
+  gap: calc(10px * var(--scale));
+}
+
+.num {
+  font-family: '{{ theme.font_heading }}', sans-serif;
+  font-size: calc(92px * var(--scale));
+  font-weight: 800;
+  line-height: 0.92;
+  letter-spacing: -0.04em;
+  color: var(--text);
+}
+
+.num-total {
+  font-family: '{{ theme.font_mono }}', monospace;
+  font-size: calc(28px * var(--scale));
+  font-weight: 600;
+  color: var(--subtle);
+}
+
+.layout-chip {
+  display: inline-flex;
+  align-items: center;
+  font-family: '{{ theme.font_mono }}', monospace;
+  font-size: calc(21px * var(--scale));
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  padding: calc(10px * var(--scale)) calc(22px * var(--scale));
+  border-radius: 999px;
+  background: var(--pill-glass-bg);
+  border: 1.5px solid var(--pill-glass-border);
+  color: var(--accent);
+}
+
+.divider {
+  width: 100%;
+  height: 2px;
+  background: var(--divider);
+  margin-bottom: calc(24px * var(--scale));
+}
+
+.eyebrow {
+  font-size: calc(28px * var(--scale));
+  font-weight: 500;
+  color: var(--subtle);
+  margin-bottom: calc(6px * var(--scale));
+}
+
+.title {
+  font-family: '{{ theme.font_heading }}', sans-serif;
+  font-size: calc({{ title_size }}px * var(--scale));
+  font-weight: 800;
+  line-height: 1.03;
+  letter-spacing: -0.04em;
+  color: var(--text);
+  margin-bottom: calc(14px * var(--scale));
+  word-break: break-word;
+}
+
+.desc {
+  font-size: calc(29px * var(--scale));
+  font-weight: 400;
+  line-height: 1.35;
+  color: var(--muted);
+  max-width: 98%;
+}
+
+.checklist-stage {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: calc(16px * var(--scale));
+  margin: calc(22px * var(--scale)) 0;
+  min-height: 0;
+}
+
+.check-card {
+  display: flex;
+  align-items: flex-start;
+  gap: calc(22px * var(--scale));
+  padding: calc(22px * var(--scale)) calc(26px * var(--scale));
+  border-radius: calc(var(--radius) * 0.85);
+  background: {{ '#FFFFFF' if theme.is_light else 'rgba(255, 255, 255, 0.045)' }};
+  border: 1.5px solid {{ 'rgba(17, 18, 20, 0.11)' if theme.is_light else 'rgba(255, 255, 255, 0.12)' }};
+  box-shadow: {{ '0 10px 26px rgba(17, 18, 20, 0.06)' if theme.is_light else '0 14px 34px rgba(0, 0, 0, 0.30)' }};
+}
+
+.check-card.is-accent {
+  background: {{ theme.accent_color }}{{ '14' if theme.is_light else '16' }};
+  border-color: var(--accent);
+  box-shadow: 0 14px 36px {{ theme.accent_color }}24;
+}
+
+.check-badge {
+  width: calc(52px * var(--scale));
+  height: calc(52px * var(--scale));
+  border-radius: calc(14px * var(--scale));
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: '{{ theme.font_mono }}', monospace;
+  font-size: calc(23px * var(--scale));
+  font-weight: 800;
+  background: var(--pill-glass-bg);
+  border: 1.5px solid var(--pill-glass-border);
+  color: var(--accent);
+}
+
+.check-card.is-accent .check-badge {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-text);
+}
+
+.check-content {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: calc(4px * var(--scale));
+}
+
+.check-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.check-title {
+  font-family: '{{ theme.font_heading }}', sans-serif;
+  font-size: calc(30px * var(--scale));
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--text);
+  line-height: 1.22;
+}
+
+.check-tag {
+  font-family: '{{ theme.font_mono }}', monospace;
+  font-size: calc(17px * var(--scale));
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  padding: calc(5px * var(--scale)) calc(14px * var(--scale));
+  border-radius: 999px;
+  background: var(--pill-glass-bg);
+  border: 1px solid var(--pill-glass-border);
+  color: var(--accent);
+  white-space: nowrap;
+}
+
+.check-detail {
+  font-size: calc(24px * var(--scale));
+  line-height: 1.34;
+  color: var(--muted);
+}
+
+.summary-bar {
+  display: flex;
+  align-items: center;
+  gap: calc(12px * var(--scale));
+  padding: calc(16px * var(--scale)) calc(24px * var(--scale));
+  border-radius: calc(16px * var(--scale));
+  background: var(--pill-glass-bg);
+  border: 1.5px solid var(--pill-glass-border);
+  font-size: calc(23px * var(--scale));
+  font-weight: 600;
+  color: var(--text);
+}
+
+.summary-dot {
+  width: calc(12px * var(--scale));
+  height: calc(12px * var(--scale));
+  border-radius: 999px;
+  background: var(--accent);
+  flex-shrink: 0;
+}
+
+.footer {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: calc(16px * var(--scale));
+}
+
+.pills {
+  display: flex;
+  align-items: center;
+  gap: calc(14px * var(--scale));
+  flex-wrap: wrap;
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: calc(58px * var(--scale));
+  padding: 0 calc(26px * var(--scale));
+  border-radius: 999px;
+  font-size: calc(24px * var(--scale));
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.pill-glass {
+  background: var(--pill-glass-bg);
+  border: 1.5px solid var(--pill-glass-border);
+  color: var(--text);
+}
+
+.pill-accent {
+  background: var(--pill-accent-bg);
+  color: var(--pill-accent-text);
+  font-weight: 700;
+}
+
+.cli-pill {
+  display: inline-flex;
+  align-items: center;
+  background: var(--cli-bg);
+  border: 1.5px solid var(--cli-border);
+  border-radius: 999px;
+  padding: calc(14px * var(--scale)) calc(28px * var(--scale));
+  font-family: '{{ theme.font_mono }}', monospace;
+  font-size: calc(22px * var(--scale));
+  font-weight: 500;
+  color: var(--cli-text);
+  max-width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.micro-note {
+  font-size: calc(21px * var(--scale));
+  font-weight: 700;
+  letter-spacing: 0.085em;
+  text-transform: uppercase;
+  padding-left: 6px;
+  color: {{ theme.accent_color if item.footnote_accent else theme.subtle_color }};
+}
+
+.watermark {
+  position: absolute;
+  z-index: 20;
+  font-size: calc(24px * var(--scale));
+  font-weight: 600;
+  color: var(--subtle);
+}
+.wm-bottom-right { right: calc(82px * var(--scale)); bottom: calc(68px * var(--scale)); }
+.wm-top-right { right: calc(82px * var(--scale)); top: calc(78px * var(--scale)); }
+.wm-bottom-left { left: calc(82px * var(--scale)); bottom: calc(24px * var(--scale)); }
+</style>
+</head>
+<body>
+  <div class="canvas">
+    {% if theme.show_progress and total_items > 1 %}
+      <div class="progress-track"><div class="progress-fill"></div></div>
+    {% endif %}
+    <div class="ambient-glow"></div>
+
+    <div class="inner">
+      <div class="top-bar">
+        <div class="num-group">
+          <div class="num">{{ slide_number }}</div>
+          {% if theme.show_progress and total_items > 1 %}
+            <div class="num-total">/ {{ total_items_str }}</div>
+          {% endif %}
+        </div>
+        <div class="layout-chip">{{ 'ROADMAP' if checklist.numbered else 'CHECKLIST' }}</div>
+      </div>
+      <div class="divider"></div>
+      {% if item.eyebrow %}
+        <div class="eyebrow">{{ item.eyebrow }}</div>
+      {% endif %}
+      <div class="title">{{ item.title }}</div>
+      {% if item.description %}
+        <div class="desc">{{ item.description }}</div>
+      {% endif %}
+
+      <div class="checklist-stage">
+        {% for entry in checklist.items %}
+        <div class="check-card {{ 'is-accent' if entry.accent else '' }}">
+          <div class="check-badge">
+            {% if checklist.numbered %}
+              {{ '%02d' | format(loop.index) }}
+            {% else %}
+              {{ '✓' if entry.checked else '○' }}
+            {% endif %}
+          </div>
+          <div class="check-content">
+            <div class="check-head">
+              <div class="check-title">{{ entry.title }}</div>
+              {% if entry.badge %}
+                <div class="check-tag">{{ entry.badge }}</div>
+              {% endif %}
+            </div>
+            {% if entry.detail %}
+              <div class="check-detail">{{ entry.detail }}</div>
+            {% endif %}
+          </div>
+        </div>
+        {% endfor %}
+
+        {% if checklist.summary %}
+        <div class="summary-bar">
+          <span class="summary-dot"></span>
+          <span>{{ checklist.summary }}</span>
+        </div>
+        {% endif %}
+      </div>
+
+      <div class="footer">
+        {% if item.badges %}
+        <div class="pills">
+          {% for badge in item.badges %}
+            <div class="pill pill-{{ badge.style.value }}">{{ badge.text }}</div>
+          {% endfor %}
+        </div>
+        {% endif %}
+
+        {% if item.command_or_url %}
+          <div class="cli-pill">{{ item.command_or_url }}</div>
+        {% endif %}
+
+        {% if item.footnote %}
+          <div class="micro-note">{{ item.footnote }}</div>
+        {% endif %}
+      </div>
+    </div>
+
+    {% if theme.watermark %}
+      <div class="watermark wm-{{ theme.watermark_position.value }}">{{ theme.watermark }}</div>
+    {% endif %}
+  </div>
+</body>
+</html>

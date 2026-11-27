@@ -145,7 +145,7 @@ class WebsiteSource(BaseSource):
 
         items: list[SlideItem] = []
         executable = _find_chromium_executable()
-        launch_kwargs: dict[str, object] = {"args": ["--no-sandbox"]}
+        launch_kwargs: dict[str, object] = {"args": ["--no-sandbox", "--disable-dev-shm-usage"]}
         if executable:
             launch_kwargs["executable_path"] = executable
 
@@ -185,6 +185,7 @@ class WebsiteSource(BaseSource):
                     items.append(
                         SlideItem(
                             source="website",
+                            frame=entry.frame,
                             eyebrow=eyebrow,
                             title=title,
                             description=description,

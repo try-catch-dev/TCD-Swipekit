@@ -7,17 +7,19 @@ import contextlib
 import html
 import re
 from pathlib import Path
+from typing import Any
 from urllib.parse import quote_plus
 
 import yaml
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 from PIL import Image
-from playwright.sync_api import Page, sync_playwright
+from playwright.sync_api import sync_playwright
 
 from tcd_swipekit.copywriter import build_caption_markdown
 from tcd_swipekit.image_utils import extract_ambient_tint, to_data_uri
 from tcd_swipekit.models import (
     AspectRatio,
+    ChecklistBlock,
     CodeBlock,
     CoverConfig,
     DeckSpec,
@@ -26,7 +28,7 @@ from tcd_swipekit.models import (
     SlideLayout,
     ThemeConfig,
 )
-from tcd_swipekit.themes.loader import TEMPLATES_DIR
+from tcd_swipekit.themes.loader import get_template_search_dirs
 
 ICONS_SVG: dict[str, str] = {
     "github": """
@@ -218,7 +220,6 @@ def highlight_code_lines(code_block: CodeBlock) -> list[dict[str, object]]:
                         rendered_lines[-1].append(f'<span class="{css_cls}">{escaped}</span>')
                     else:
                         rendered_lines[-1].append(escaped)
-        # Pygments may append a trailing empty line matching stripnl behavior
         if len(rendered_lines) > len(raw_lines) and not rendered_lines[-1]:
             rendered_lines.pop()
         line_htmls = ["".join(chunks) or "&nbsp;" for chunks in rendered_lines]
@@ -249,7 +250,11 @@ def highlight_code_lines(code_block: CodeBlock) -> list[dict[str, object]]:
     return results
 
 
-def export_slides_to_pdf(slide_paths: list[Path], pdf_path: Path) -> Path:
+def export_slides_to_pdf(
+    slide_paths: list[Path],
+    pdf_path: Path,
+    deck: DeckSpec | None = None,
+) -> Path:
     """Combine rendered slide PNGs into a single multi-page PDF (ideal for LinkedIn Carousels)."""
     if not slide_paths:
         raise ValueError("Cannot export PDF: no slide images provided.")
@@ -268,6 +273,174 @@ def export_slides_to_pdf(slide_paths: list[Path], pdf_path: Path) -> Path:
     return pdf_path
 
 
+def export_slides_to_gif(
+    slide_paths: list[Path],
+    gif_path: Path,
+    deck: DeckSpec | None = None,
+    *,
+    duration_ms: int = 1800,
+    max_width: int = 640,
+) -> Path:
+    """Export rendered slide PNGs into an animated GIF slideshow (pure Pillow, zero ffmpeg required)."""
+    if not slide_paths:
+        raise ValueError("Cannot export GIF: no slide images provided.")
+
+    frames: list[Image.Image] = []
+    try:
+        for path in slide_paths:
+            with Image.open(path) as img:
+                rgb = img.convert("RGB")
+                w, h = rgb.size
+                if w > max_width:
+                    new_h = int(h * (max_width / w))
+                    rgb = rgb.resize((max_width, new_h), Image.Resampling.LANCZOS)
+                frames.append(rgb.quantize(colors=256, method=Image.Quantize.MEDIANCUT))
+        gif_path.parent.mkdir(parents=True, exist_ok=True)
+        first, rest = frames[0], frames[1:]
+        first.save(
+            gif_path,
+            format="GIF",
+            save_all=True,
+            append_images=rest,
+            duration=duration_ms,
+            loop=0,
+            optimize=True,
+        )
+    finally:
+        for frame in frames:
+            frame.close()
+    return gif_path
+
+
+def _showcase_context_builder(
+    item: SlideItem,
+    index: int,
+    total_items: int,
+    theme: ThemeConfig,
+    width: int,
+    height: int,
+) -> dict[str, Any]:
+    image_uri: str | None = None
+    ambient_tint = item.ambient_tint or (
+        "rgba(245, 244, 240, 0.88)" if theme.is_light else "rgba(14, 18, 28, 0.74)"
+    )
+    if item.screenshot_path:
+        p = Path(item.screenshot_path)
+        if p.is_file():
+            image_uri = to_data_uri(p)
+            if not item.ambient_tint:
+                ambient_tint = extract_ambient_tint(p, is_light_theme=theme.is_light)
+
+    base_shot_ratio = 0.35 if item.command_or_url else 0.39
+    max_shot_height = int(height * base_shot_ratio)
+    return {
+        "image_uri": image_uri,
+        "ambient_tint": ambient_tint,
+        "max_shot_height": max_shot_height,
+    }
+
+
+def _code_context_builder(
+    item: SlideItem,
+    index: int,
+    total_items: int,
+    theme: ThemeConfig,
+    width: int,
+    height: int,
+) -> dict[str, Any]:
+    block = item.code_block or CodeBlock(code="", language="text")
+    raw_lines = block.code.strip("\n").splitlines() or [""]
+    code_lines = highlight_code_lines(block)
+    code_lang = block.language.upper()
+    code_filename = block.filename or f"snippet.{block.language.lower()}"
+    return {
+        "title_size": min(_compute_title_font_size(item.title), 86),
+        "code_lines": code_lines,
+        "code_lang": code_lang,
+        "code_filename": code_filename,
+        "code_font_size": _compute_code_font_size(raw_lines),
+        "show_line_numbers": block.show_line_numbers,
+    }
+
+
+def _versus_context_builder(
+    item: SlideItem,
+    index: int,
+    total_items: int,
+    theme: ThemeConfig,
+    width: int,
+    height: int,
+) -> dict[str, Any]:
+    return {
+        "versus": item.versus,
+        "side_by_side": width >= height,
+        "title_size": min(_compute_title_font_size(item.title), 84),
+    }
+
+
+def _checklist_context_builder(
+    item: SlideItem,
+    index: int,
+    total_items: int,
+    theme: ThemeConfig,
+    width: int,
+    height: int,
+) -> dict[str, Any]:
+    return {
+        "checklist": item.checklist or ChecklistBlock(),
+        "title_size": min(_compute_title_font_size(item.title), 84),
+    }
+
+
+def register_builtin_layouts_and_exporters() -> None:
+    """Register the 4 built-in slide layouts and built-in PDF/GIF exporters."""
+    from tcd_swipekit.plugins import register_exporter, register_layout
+
+    register_layout(
+        SlideLayout.SHOWCASE.value,
+        template="slide.html.j2",
+        context_builder=_showcase_context_builder,
+        description="Hero screenshot / repo / website showcase card (supports browser & macOS frames)",
+        builtin=True,
+    )
+    register_layout(
+        SlideLayout.CODE.value,
+        template="slide_code.html.j2",
+        context_builder=_code_context_builder,
+        description="Syntax-highlighted code snippet or terminal diff card (Pygments)",
+        builtin=True,
+    )
+    register_layout(
+        SlideLayout.VERSUS.value,
+        template="slide_versus.html.j2",
+        context_builder=_versus_context_builder,
+        description="Responsive A-vs-B comparison card (stacked portrait / side-by-side square)",
+        builtin=True,
+    )
+    register_layout(
+        SlideLayout.CHECKLIST.value,
+        template="slide_checklist.html.j2",
+        context_builder=_checklist_context_builder,
+        description="Actionable checklist, roadmap, or step-by-step takeaways card",
+        builtin=True,
+    )
+
+    register_exporter(
+        "pdf",
+        export_slides_to_pdf,
+        filename="carousel.pdf",
+        description="Multi-page PDF document carousel (ready for LinkedIn)",
+        builtin=True,
+    )
+    register_exporter(
+        "gif",
+        export_slides_to_gif,
+        filename="carousel.gif",
+        description="Animated GIF slideshow preview for READMEs, X/Twitter, and Slack",
+        builtin=True,
+    )
+
+
 def _find_chromium_executable() -> str | None:
     for candidate in ("/usr/bin/google-chrome", "/usr/bin/chromium", "/usr/bin/chromium-browser"):
         if Path(candidate).exists():
@@ -281,11 +454,12 @@ def _slugify(value: str) -> str:
 
 
 class SlideRenderer:
-    """Renders a DeckSpec into high-DPI PNG slides, optional PDF, caption.md, deck.yaml, and preview.html."""
+    """Renders a DeckSpec into high-DPI PNG slides, optional PDF/GIF/exporters, caption.md, deck.yaml, and preview.html."""
 
     def __init__(self, templates_dir: Path | None = None) -> None:
+        search_paths = [str(p) for p in get_template_search_dirs(extra_dir=templates_dir)]
         self.env = Environment(
-            loader=FileSystemLoader(str(templates_dir or TEMPLATES_DIR)),
+            loader=FileSystemLoader(search_paths),
             autoescape=select_autoescape(["html", "xml"]),
         )
 
@@ -328,77 +502,55 @@ class SlideRenderer:
         theme: ThemeConfig,
         width: int,
         height: int,
+        total_items: int = 1,
     ) -> str:
+        from tcd_swipekit.plugins import get_layout
+
         scale = min(width / 1180.0, height / 1572.0)
         font_css = build_font_css(theme)
+        effective_total = max(total_items, index, 1)
+        progress_percent = int(round((index / effective_total) * 100))
 
-        if item.layout == SlideLayout.CODE and item.code_block is not None:
-            raw_lines = item.code_block.code.strip("\n").splitlines() or [""]
-            code_lines = highlight_code_lines(item.code_block)
-            code_lang = item.code_block.language.upper()
-            code_filename = item.code_block.filename or f"snippet.{item.code_block.language.lower()}"
-            template = self.env.get_template("slide_code.html.j2")
-            return template.render(
-                width=width,
-                height=height,
-                scale=f"{scale:.4f}",
-                font_css=font_css,
-                theme=theme,
-                item=item,
-                slide_number=f"{index:02d}",
-                title_size=min(_compute_title_font_size(item.title), 86),
-                code_lines=code_lines,
-                code_lang=code_lang,
-                code_filename=code_filename,
-                code_font_size=_compute_code_font_size(raw_lines),
-                show_line_numbers=item.code_block.show_line_numbers,
+        base_ctx: dict[str, Any] = {
+            **item.extra,
+            "extra": item.extra,
+            "width": width,
+            "height": height,
+            "scale": f"{scale:.4f}",
+            "font_css": font_css,
+            "theme": theme,
+            "item": item,
+            "slide_number": f"{index:02d}",
+            "total_items": effective_total,
+            "total_items_str": f"{effective_total:02d}",
+            "progress_percent": progress_percent,
+            "title_size": _compute_title_font_size(item.title),
+        }
+
+        layout_key = item.layout.value if isinstance(item.layout, SlideLayout) else str(item.layout)
+        layout_reg = get_layout(layout_key)
+
+        if layout_reg is not None and layout_reg.context_builder is not None:
+            base_ctx.update(
+                layout_reg.context_builder(item, index, effective_total, theme, width, height)
+            )
+        else:
+            # Always provide default showcase image/ambient variables for custom drop-in templates
+            base_ctx.update(
+                _showcase_context_builder(item, index, effective_total, theme, width, height)
             )
 
-        if item.layout == SlideLayout.VERSUS and item.versus is not None:
-            side_by_side = width >= height
-            template = self.env.get_template("slide_versus.html.j2")
-            return template.render(
-                width=width,
-                height=height,
-                scale=f"{scale:.4f}",
-                font_css=font_css,
-                theme=theme,
-                item=item,
-                versus=item.versus,
-                side_by_side=side_by_side,
-                slide_number=f"{index:02d}",
-                title_size=min(_compute_title_font_size(item.title), 84),
-            )
+        if item.custom_template:
+            custom_path = Path(item.custom_template).expanduser()
+            if custom_path.is_file():
+                tpl = self.env.from_string(custom_path.read_text(encoding="utf-8"))
+                return tpl.render(**base_ctx)
+            tpl = self.env.get_template(item.custom_template)
+            return tpl.render(**base_ctx)
 
-        image_uri: str | None = None
-        ambient_tint = item.ambient_tint or (
-            "rgba(245, 244, 240, 0.88)" if theme.is_light else "rgba(14, 18, 28, 0.74)"
-        )
-        if item.screenshot_path:
-            p = Path(item.screenshot_path)
-            if p.is_file():
-                image_uri = to_data_uri(p)
-                if not item.ambient_tint:
-                    ambient_tint = extract_ambient_tint(p, is_light_theme=theme.is_light)
-
-        # Adapt max screenshot height based on aspect ratio and footer density
-        base_shot_ratio = 0.35 if item.command_or_url else 0.39
-        max_shot_height = int(height * base_shot_ratio)
-
-        template = self.env.get_template("slide.html.j2")
-        return template.render(
-            width=width,
-            height=height,
-            scale=f"{scale:.4f}",
-            font_css=font_css,
-            theme=theme,
-            item=item,
-            slide_number=f"{index:02d}",
-            title_size=_compute_title_font_size(item.title),
-            image_uri=image_uri,
-            ambient_tint=ambient_tint,
-            max_shot_height=max_shot_height,
-        )
+        template_name = layout_reg.template if layout_reg is not None else f"slide_{layout_key}.html.j2"
+        template = self.env.get_template(template_name)
+        return template.render(**base_ctx)
 
     def build_outro_html(
         self,
@@ -439,60 +591,109 @@ class SlideRenderer:
             footer_note=outro.footer_note or "",
         )
 
-    def _render_single_with_page(
+    @staticmethod
+    def _capture_html_to_png(
+        browser: Any,
+        html_content: str,
+        out_path: Path,
+        width: int,
+        height: int,
+    ) -> None:
+        """Render an HTML document into a PNG using a fresh isolated page (with crash-retry)."""
+        last_err: Exception | None = None
+        for _attempt in range(2):
+            page = browser.new_page(
+                viewport={"width": width, "height": height},
+                device_scale_factor=1,
+            )
+            try:
+                page.set_content(html_content, wait_until="load")
+                with contextlib.suppress(Exception):
+                    page.wait_for_load_state("networkidle", timeout=5000)
+                page.evaluate("document.fonts.ready")
+                page.screenshot(path=str(out_path), type="png")
+                return
+            except Exception as exc:
+                last_err = exc
+            finally:
+                with contextlib.suppress(Exception):
+                    page.close()
+        if last_err is not None:
+            raise last_err
+
+    def _render_single_with_browser(
         self,
-        page: Page,
+        browser: Any,
         deck: DeckSpec,
         output_dir: Path,
         write_extras: bool = True,
         export_pdf: bool = False,
+        export_gif: bool = False,
+        exporters: list[str] | None = None,
     ) -> list[Path]:
-        """Render a single DeckSpec using an already-open Playwright page."""
+        """Render a single DeckSpec using an already-open Playwright browser."""
+        from tcd_swipekit.plugins import get_exporter
+
         output_dir.mkdir(parents=True, exist_ok=True)
         width, height = deck.aspect_ratio.dimensions
-        page.set_viewport_size({"width": width, "height": height})
 
         rendered_paths: list[Path] = []
+        total_items = len(deck.items)
 
         # Slide 01: Cover
         cover_html = self.build_cover_html(deck.cover, deck.theme, width, height)
-        page.set_content(cover_html, wait_until="load")
-        with contextlib.suppress(Exception):
-            page.wait_for_load_state("networkidle", timeout=5000)
-        page.evaluate("document.fonts.ready")
         cover_out = output_dir / "01_cover.png"
-        page.screenshot(path=str(cover_out), type="png")
+        self._capture_html_to_png(browser, cover_html, cover_out, width, height)
         rendered_paths.append(cover_out)
 
         # Slides 02..N: Items
         for idx, item in enumerate(deck.items, start=1):
-            slide_html = self.build_item_html(item, idx, deck.theme, width, height)
-            page.set_content(slide_html, wait_until="load")
-            with contextlib.suppress(Exception):
-                page.wait_for_load_state("networkidle", timeout=5000)
-            page.evaluate("document.fonts.ready")
+            slide_html = self.build_item_html(
+                item,
+                idx,
+                deck.theme,
+                width,
+                height,
+                total_items=total_items,
+            )
             filename = f"{idx + 1:02d}_{_slugify(item.title)}.png"
             slide_out = output_dir / filename
-            page.screenshot(path=str(slide_out), type="png")
+            self._capture_html_to_png(browser, slide_html, slide_out, width, height)
             rendered_paths.append(slide_out)
 
         # Optional Closing CTA Slide
         if deck.outro and deck.outro.enabled:
             outro_html = self.build_outro_html(deck.outro, deck.theme, width, height)
-            page.set_content(outro_html, wait_until="load")
-            with contextlib.suppress(Exception):
-                page.wait_for_load_state("networkidle", timeout=5000)
-            page.evaluate("document.fonts.ready")
             outro_num = len(deck.items) + 2
             outro_out = output_dir / f"{outro_num:02d}_closing_cta.png"
-            page.screenshot(path=str(outro_out), type="png")
+            self._capture_html_to_png(browser, outro_html, outro_out, width, height)
             rendered_paths.append(outro_out)
 
-        pdf_filename: str | None = None
+        requested_exporters: list[str] = []
         if export_pdf:
-            pdf_out = output_dir / "carousel.pdf"
-            export_slides_to_pdf(rendered_paths, pdf_out)
-            pdf_filename = pdf_out.name
+            requested_exporters.append("pdf")
+        if export_gif:
+            requested_exporters.append("gif")
+        if exporters:
+            for exp_name in exporters:
+                norm = exp_name.strip().lower()
+                if norm and norm not in requested_exporters:
+                    requested_exporters.append(norm)
+
+        pdf_filename: str | None = None
+        gif_filename: str | None = None
+        extra_exports: list[str] = []
+
+        for exp_name in requested_exporters:
+            reg = get_exporter(exp_name)
+            out_file = output_dir / reg.filename
+            reg.fn(rendered_paths, out_file, deck)
+            if exp_name == "pdf":
+                pdf_filename = out_file.name
+            elif exp_name == "gif":
+                gif_filename = out_file.name
+            else:
+                extra_exports.append(out_file.name)
 
         if write_extras:
             # Save caption.md
@@ -519,6 +720,8 @@ class SlideRenderer:
                 width=width,
                 height=height,
                 pdf_filename=pdf_filename,
+                gif_filename=gif_filename,
+                extra_exports=extra_exports,
             )
             (output_dir / "preview.html").write_text(preview_html, encoding="utf-8")
 
@@ -530,27 +733,28 @@ class SlideRenderer:
         output_dir: Path,
         write_extras: bool = True,
         export_pdf: bool = False,
+        export_gif: bool = False,
+        exporters: list[str] | None = None,
     ) -> list[Path]:
-        """Render cover + all item slides + optional closing CTA slide to PNGs (and optional PDF)."""
+        """Render cover + all item slides + optional closing CTA slide to PNGs (and optional PDF/GIF/exporters)."""
         executable = _find_chromium_executable()
-        launch_kwargs: dict[str, object] = {"args": ["--no-sandbox", "--disable-dev-shm-usage"]}
+        launch_kwargs: dict[str, object] = {
+            "args": ["--no-sandbox", "--disable-dev-shm-usage", "--disable-gpu"]
+        }
         if executable:
             launch_kwargs["executable_path"] = executable
 
-        width, height = deck.aspect_ratio.dimensions
         with sync_playwright() as p:
             browser = p.chromium.launch(**launch_kwargs)
             try:
-                page = browser.new_page(
-                    viewport={"width": width, "height": height},
-                    device_scale_factor=1,
-                )
-                return self._render_single_with_page(
-                    page=page,
+                return self._render_single_with_browser(
+                    browser=browser,
                     deck=deck,
                     output_dir=output_dir,
                     write_extras=write_extras,
                     export_pdf=export_pdf,
+                    export_gif=export_gif,
+                    exporters=exporters,
                 )
             finally:
                 browser.close()
@@ -562,6 +766,8 @@ class SlideRenderer:
         ratios: list[AspectRatio],
         write_extras: bool = True,
         export_pdf: bool = False,
+        export_gif: bool = False,
+        exporters: list[str] | None = None,
     ) -> dict[AspectRatio, list[Path]]:
         """Render the same DeckSpec across multiple aspect ratios in one browser session.
 
@@ -580,32 +786,33 @@ class SlideRenderer:
                     output_dir=output_dir,
                     write_extras=write_extras,
                     export_pdf=export_pdf,
+                    export_gif=export_gif,
+                    exporters=exporters,
                 )
             }
 
         executable = _find_chromium_executable()
-        launch_kwargs: dict[str, object] = {"args": ["--no-sandbox", "--disable-dev-shm-usage"]}
+        launch_kwargs: dict[str, object] = {
+            "args": ["--no-sandbox", "--disable-dev-shm-usage", "--disable-gpu"]
+        }
         if executable:
             launch_kwargs["executable_path"] = executable
 
         results: dict[AspectRatio, list[Path]] = {}
-        first_w, first_h = unique_ratios[0].dimensions
         with sync_playwright() as p:
             browser = p.chromium.launch(**launch_kwargs)
             try:
-                page = browser.new_page(
-                    viewport={"width": first_w, "height": first_h},
-                    device_scale_factor=1,
-                )
                 for ratio in unique_ratios:
                     ratio_deck = deck.model_copy(update={"aspect_ratio": ratio})
                     sub_dir = output_dir / ratio.folder_slug
-                    results[ratio] = self._render_single_with_page(
-                        page=page,
+                    results[ratio] = self._render_single_with_browser(
+                        browser=browser,
                         deck=ratio_deck,
                         output_dir=sub_dir,
                         write_extras=write_extras,
                         export_pdf=export_pdf,
+                        export_gif=export_gif,
+                        exporters=exporters,
                     )
             finally:
                 browser.close()

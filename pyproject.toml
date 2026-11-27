@@ -4,8 +4,8 @@ build-backend = "hatchling.build"
 
 [project]
 name = "tcd-swipekit"
-version = "0.1.0"
-description = "Generate modern social media photo-slide carousels from GitHub repos, websites (sites.yml), and custom YAML decks."
+version = "0.2.0"
+description = "Generate modern social media photo-slide carousels from GitHub repos, websites (sites.yml), Markdown articles, and custom YAML decks."
 readme = "README.md"
 license = { file = "LICENSE" }
 requires-python = ">=3.10"

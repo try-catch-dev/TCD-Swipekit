@@ -200,6 +200,14 @@
       {% if pdf_filename %}
       <span class="meta-pill"><a href="{{ pdf_filename }}" target="_blank">📄 {{ pdf_filename }}</a></span>
       {% endif %}
+      {% if gif_filename %}
+      <span class="meta-pill"><a href="{{ gif_filename }}" target="_blank">🎞️ {{ gif_filename }}</a></span>
+      {% endif %}
+      {% if extra_exports %}
+        {% for exp_file in extra_exports %}
+        <span class="meta-pill"><a href="{{ exp_file }}" target="_blank">📦 {{ exp_file }}</a></span>
+        {% endfor %}
+      {% endif %}
     </div>
   </header>
 
@@ -330,8 +338,9 @@
       renderOverlay();
     }
 
+    let cacheBust = '';
     function render() {
-      img.src = slides[idx];
+      img.src = slides[idx] + (cacheBust ? `?v=${cacheBust}` : '');
       counter.textContent = `Slide ${idx + 1} / ${slides.length}`;
       filenameEl.textContent = slides[idx];
       dotsEl.innerHTML = slides.map((_, i) =>
@@ -350,6 +359,25 @@
     });
     render();
     renderOverlay();
+
+    // Live-reload support when served via `swipekit watch`
+    if (window.location.protocol.startsWith('http')) {
+      let currentVersion = null;
+      setInterval(async () => {
+        try {
+          const resp = await fetch('/__swipekit_version', { cache: 'no-store' });
+          if (!resp.ok) return;
+          const data = await resp.json();
+          if (currentVersion === null) {
+            currentVersion = data.version;
+          } else if (data.version !== currentVersion) {
+            currentVersion = data.version;
+            cacheBust = String(data.version);
+            render();
+          }
+        } catch (_) {}
+      }, 1000);
+    }
   </script>
 </body>
 </html>

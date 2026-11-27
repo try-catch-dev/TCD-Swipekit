@@ -65,26 +65,37 @@ swipekit generate web --sites ./sites.yml --output ./output/websites_deck
 
 `swipekit generate web` automatically launches headless Chromium via Playwright, dismisses common cookie banners, captures crisp `1280×800` desktop screenshots, extracts OpenGraph metadata, and renders the full slide bundle (`01_cover.png`, item slides, optional `closing_cta.png`, optional `carousel.pdf`, `caption.md`, `deck.yaml`, and `preview.html`).
 
-### Workflow C — Custom Cover, Slide Layouts & Creator Brand Profile
+### Workflow C — Markdown-to-Carousel, Slide Layouts & Extensibility
 
+- **Markdown-to-Carousel (`swipekit generate markdown`):**
+  - Convert any `.md` article, tutorial, or doc directly into a multi-layout deck:
+    ```bash
+    swipekit generate markdown ./article.md --theme editorial-light --outro --pdf --gif -o ./output/md_deck
+    ```
+- **Live Watch Server (`swipekit watch`):**
+  - Run `swipekit watch ./deck.yaml --port 8765` to auto-re-render on save and hot-reload the browser preview.
 - **Cover modes:**
-  - `mode: photo` + `image_path: ./cover.png` — Editorial portrait/photo seamlessly fading into the dark cover canvas.
+  - `mode: photo` + `image_path: ./cover.png` — Editorial portrait/photo seamlessly fading into the cover canvas.
   - `mode: gradient` — Modern dual-orb mesh gradient with architectural grid lines.
   - `mode: minimal` — Clean editorial typography-first layout.
 - **Slide layouts:**
-  - `layout: showcase` (default) — Hero screenshot / GitHub repo / website showcase.
+  - `layout: showcase` (default) — Hero screenshot / GitHub repo / website showcase (supports `frame: browser | macos | none`).
   - `layout: code` (`code_block:`) — Syntax-highlighted code window with optional line highlights and diff coloring (`diff_mode: true`).
   - `layout: versus` (`versus:`) — Stacked (portrait) or side-by-side (`1:1`) A-vs-B comparison card with verdict bar.
+  - `layout: checklist` (`checklist:`) — Numbered roadmap or checkmark audit card with per-item tags and summary bar.
+- **Extensibility (`swipekit plugins`):**
+  - Add custom themes in `./themes/`, custom Jinja2 slide layouts in `./templates/slide_<name>.html.j2`, or custom Python plugins (`--plugin ./my_plugin.py` / `swipekit init plugin`) using `@register_source`, `@register_layout`, and `@register_exporter`.
 - **Closing CTA (`outro`):** Pass `--outro` on the CLI or include an `outro:` block in YAML so slide `N+1` prompts viewers to **Save**, **Follow**, and **Comment**.
 - **Creator Brand Profile:** Run `swipekit init profile` (`.swipekit.yaml` or `--global`) to store default theme, watermark, language, cover photo, and outro once.
 
-See [references/deck-schema.md](references/deck-schema.md) for full `deck.yaml`, `sites.yml`, `code_block`, `versus`, `outro`, and profile fields, and [references/brand-themes.md](references/brand-themes.md) for all built-in theme presets (`midnight-emerald`, `cyber-indigo`, `neon-violet`, `editorial-light`) and custom `.yaml` theme overrides (including dynamic Google Fonts and local `font_files`).
+See [references/deck-schema.md](references/deck-schema.md) for full `deck.yaml`, `sites.yml`, `code_block`, `versus`, `checklist`, `outro`, and profile fields, and [references/brand-themes.md](references/brand-themes.md) for all 8 built-in theme presets (`midnight-emerald`, `editorial-light`, `arctic-slate`, `nord-frost`, `cyber-indigo`, `neon-violet`, `amber-noir`, `crimson-carbon`) and custom `.yaml` theme overrides.
 
 ## 3. Output Artifacts
 
 Every run outputs:
 - `01_cover.png` … `NN_<slug>.png` (+ optional `NN_closing_cta.png`)
 - `carousel.pdf` (when `--pdf` is enabled — ready for LinkedIn Document Carousels)
+- `carousel.gif` (when `--gif` is enabled — animated GIF slideshow preview)
 - `caption.md` — Ready-to-paste social media caption, hashtags, and numbered links
 - `deck.yaml` — Editable snapshot for fast re-renders (`swipekit render deck.yaml`)
 - `preview.html` — Interactive keyboard-navigable browser preview with toggleable TikTok / IG Reels / IG Carousel / LinkedIn Safe-Zone overlays

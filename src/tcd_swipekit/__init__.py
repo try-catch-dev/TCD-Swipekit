@@ -1,13 +1,16 @@
-"""TCD-Swipekit: Modern photo-slide carousel generator for GitHub repos & websites."""
+"""TCD-Swipekit: Modern photo-slide carousel generator for GitHub repos, websites, Markdown & YAML decks."""
 
 from tcd_swipekit.models import (
     AspectRatio,
     BadgeStyle,
+    ChecklistBlock,
+    ChecklistEntry,
     CodeBlock,
     CoverConfig,
     CoverMode,
     CreatorProfile,
     DeckSpec,
+    FrameStyle,
     Language,
     OutroAction,
     OutroConfig,
@@ -21,19 +24,41 @@ from tcd_swipekit.models import (
     VersusSide,
     WatermarkPosition,
 )
-from tcd_swipekit.pipeline import generate_github_deck, generate_website_deck, render_deck_file
+from tcd_swipekit.pipeline import (
+    generate_custom_source_deck,
+    generate_github_deck,
+    generate_markdown_deck,
+    generate_website_deck,
+    render_deck_file,
+)
+from tcd_swipekit.plugins import (
+    get_exporter,
+    get_layout,
+    get_source_class,
+    list_exporters,
+    list_layouts,
+    list_sources,
+    load_plugin_file,
+    register_exporter,
+    register_layout,
+    register_source,
+)
+from tcd_swipekit.themes.loader import register_template_dir, register_theme_dir
 
-__version__ = "0.1.0"
+__version__ = "0.2.0"
 
 __all__ = [
     "__version__",
     "AspectRatio",
     "BadgeStyle",
+    "ChecklistBlock",
+    "ChecklistEntry",
     "CodeBlock",
     "CoverConfig",
     "CoverMode",
     "CreatorProfile",
     "DeckSpec",
+    "FrameStyle",
     "Language",
     "OutroAction",
     "OutroConfig",
@@ -46,7 +71,21 @@ __all__ = [
     "VersusBlock",
     "VersusSide",
     "WatermarkPosition",
+    "generate_custom_source_deck",
     "generate_github_deck",
+    "generate_markdown_deck",
     "generate_website_deck",
+    "get_exporter",
+    "get_layout",
+    "get_source_class",
+    "list_exporters",
+    "list_layouts",
+    "list_sources",
+    "load_plugin_file",
+    "register_exporter",
+    "register_layout",
+    "register_source",
+    "register_template_dir",
+    "register_theme_dir",
     "render_deck_file",
 ]

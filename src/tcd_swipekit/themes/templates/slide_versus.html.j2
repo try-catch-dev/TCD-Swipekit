@@ -66,11 +66,33 @@ html, body {
   height: 100%;
 }
 
+.progress-track {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: calc(7px * var(--scale));
+  background: var(--divider);
+  z-index: 25;
+}
+
+.progress-fill {
+  height: 100%;
+  width: {{ progress_percent }}%;
+  background: var(--accent);
+}
+
 .top-bar {
   display: flex;
   align-items: center;
   justify-content: space-between;
   margin-bottom: calc(20px * var(--scale));
+}
+
+.num-group {
+  display: flex;
+  align-items: baseline;
+  gap: calc(10px * var(--scale));
 }
 
 .num {
@@ -80,6 +102,13 @@ html, body {
   line-height: 0.92;
   letter-spacing: -0.04em;
   color: var(--text);
+}
+
+.num-total {
+  font-family: '{{ theme.font_mono }}', monospace;
+  font-size: calc(26px * var(--scale));
+  font-weight: 600;
+  color: var(--subtle);
 }
 
 .layout-chip {
@@ -369,11 +398,19 @@ html, body {
 </head>
 <body>
   <div class="canvas">
+    {% if theme.show_progress and total_items > 1 %}
+      <div class="progress-track"><div class="progress-fill"></div></div>
+    {% endif %}
     <div class="ambient-glow"></div>
 
     <div class="inner">
       <div class="top-bar">
-        <div class="num">{{ slide_number }}</div>
+        <div class="num-group">
+          <div class="num">{{ slide_number }}</div>
+          {% if theme.show_progress and total_items > 1 %}
+            <div class="num-total">/ {{ total_items_str }}</div>
+          {% endif %}
+        </div>
         <div class="layout-chip">VS COMPARE</div>
       </div>
       <div class="divider"></div>

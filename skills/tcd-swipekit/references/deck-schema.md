@@ -141,6 +141,18 @@ items:
         code: "uv sync --frozen"
         accent: true
       verdict: "Switch to uv for instant setups and faster CI."
+
+  - source: manual
+    layout: checklist         # auto-inferred when `checklist:` is set
+    eyebrow: "release / audit"
+    title: "Pre-Ship Checklist"
+    description: "Four essential checks before deploying to production."
+    checklist:
+      numbered: true
+      items:
+        - { title: "Lock dependencies", detail: "Commit uv.lock for deterministic builds.", badge: "CI/CD", accent: true }
+        - { title: "Enforce Ruff & types", detail: "Block merges on lint regressions.", badge: "QUALITY" }
+      summary: "Automate all checks in GitHub Actions."
 ```
 
 ## Creator Brand Profile (`.swipekit.yaml` / `~/.config/swipekit/config.yaml`)
@@ -153,6 +165,7 @@ language: en
 aspect_ratio: "3:4"
 # ratios: ["3:4", "4:5", "1:1"]
 export_pdf: false
+export_gif: false
 outro:
   enabled: true
   badge_text: "DONE · WANT PART 2?"

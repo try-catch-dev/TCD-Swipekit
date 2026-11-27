@@ -81,25 +81,54 @@ html, body {
 
 .top-bar {
   display: flex;
-  align-items: flex-start;
+  align-items: baseline;
   justify-content: space-between;
-  margin-bottom: calc(38px * var(--scale));
+  margin-bottom: calc(34px * var(--scale));
+}
+
+.num-group {
+  display: flex;
+  align-items: baseline;
+  gap: calc(10px * var(--scale));
 }
 
 .num {
   font-family: '{{ theme.font_heading }}', sans-serif;
-  font-size: calc(116px * var(--scale));
+  font-size: calc(112px * var(--scale));
   font-weight: 800;
   line-height: 0.92;
   letter-spacing: -0.04em;
   color: var(--text);
 }
 
+.num-total {
+  font-family: '{{ theme.font_mono }}', monospace;
+  font-size: calc(30px * var(--scale));
+  font-weight: 600;
+  color: var(--subtle);
+}
+
+.progress-track {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: calc(7px * var(--scale));
+  background: var(--divider);
+  z-index: 25;
+}
+
+.progress-fill {
+  height: 100%;
+  width: {{ progress_percent }}%;
+  background: var(--accent);
+}
+
 .divider {
   width: 100%;
   height: 2px;
   background: var(--divider);
-  margin-bottom: calc(38px * var(--scale));
+  margin-bottom: calc(36px * var(--scale));
 }
 
 .eyebrow {
@@ -117,7 +146,7 @@ html, body {
   line-height: 1.02;
   letter-spacing: -0.04em;
   color: var(--text);
-  margin-bottom: calc(26px * var(--scale));
+  margin-bottom: calc(24px * var(--scale));
   word-break: break-word;
 }
 
@@ -135,7 +164,7 @@ html, body {
   display: flex;
   align-items: center;
   justify-content: center;
-  margin: calc(30px * var(--scale)) 0 calc(32px * var(--scale)) 0;
+  margin: calc(26px * var(--scale)) 0 calc(28px * var(--scale)) 0;
   min-height: 0;
 }
 
@@ -148,6 +177,76 @@ html, body {
   box-shadow: {{ '0 26px 68px rgba(0, 0, 0, 0.56), 0 0 0 1px rgba(255, 255, 255, 0.10)' if not theme.is_light else '0 20px 50px rgba(17, 18, 20, 0.14), 0 0 0 1px rgba(17, 18, 20, 0.08)' }};
   object-fit: {{ item.image_fit }};
   display: block;
+}
+
+.frame-window {
+  max-width: 100%;
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: {{ '#11141B' if not theme.is_light else '#FFFFFF' }};
+  border: 1.5px solid {{ 'rgba(255, 255, 255, 0.14)' if not theme.is_light else 'rgba(17, 18, 20, 0.14)' }};
+  box-shadow: {{ '0 28px 70px rgba(0, 0, 0, 0.58)' if not theme.is_light else '0 22px 54px rgba(17, 18, 20, 0.14)' }};
+  display: flex;
+  flex-direction: column;
+}
+
+.frame-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: calc(16px * var(--scale));
+  padding: calc(14px * var(--scale)) calc(22px * var(--scale));
+  background: {{ 'rgba(255, 255, 255, 0.05)' if not theme.is_light else '#F1F5F9' }};
+  border-bottom: 1px solid {{ 'rgba(255, 255, 255, 0.10)' if not theme.is_light else 'rgba(15, 23, 42, 0.10)' }};
+}
+
+.frame-dots {
+  display: flex;
+  align-items: center;
+  gap: calc(9px * var(--scale));
+  flex-shrink: 0;
+}
+
+.fdot {
+  width: calc(13px * var(--scale));
+  height: calc(13px * var(--scale));
+  border-radius: 999px;
+}
+.fdot-r { background: #FF5F56; }
+.fdot-y { background: #FFBD2E; }
+.fdot-g { background: #27C93F; }
+
+.frame-url-pill {
+  flex: 1;
+  max-width: 72%;
+  margin: 0 auto;
+  padding: calc(7px * var(--scale)) calc(18px * var(--scale));
+  border-radius: 999px;
+  background: {{ 'rgba(0, 0, 0, 0.36)' if not theme.is_light else '#FFFFFF' }};
+  border: 1px solid {{ 'rgba(255, 255, 255, 0.10)' if not theme.is_light else 'rgba(15, 23, 42, 0.10)' }};
+  font-family: '{{ theme.font_mono }}', monospace;
+  font-size: calc(18px * var(--scale));
+  font-weight: 500;
+  color: var(--muted);
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.frame-title {
+  font-family: '{{ theme.font_mono }}', monospace;
+  font-size: calc(19px * var(--scale));
+  font-weight: 600;
+  color: var(--muted);
+  margin: 0 auto;
+}
+
+.shot.in-frame {
+  border-radius: 0;
+  box-shadow: none;
+  max-height: {{ (max_shot_height - 46) | int }}px;
+  width: 100%;
 }
 
 .shot-placeholder {
@@ -262,6 +361,9 @@ html, body {
 </head>
 <body>
   <div class="canvas">
+    {% if theme.show_progress and total_items > 1 %}
+      <div class="progress-track"><div class="progress-fill"></div></div>
+    {% endif %}
     {% if theme.ambient_blur and image_uri and not theme.is_light %}
       <div class="ambient-bg"></div>
       <div class="ambient-overlay"></div>
@@ -269,7 +371,12 @@ html, body {
 
     <div class="inner">
       <div class="top-bar">
-        <div class="num">{{ slide_number }}</div>
+        <div class="num-group">
+          <div class="num">{{ slide_number }}</div>
+          {% if theme.show_progress and total_items > 1 %}
+            <div class="num-total">/ {{ total_items_str }}</div>
+          {% endif %}
+        </div>
       </div>
       <div class="divider"></div>
       {% if item.eyebrow %}
@@ -282,7 +389,35 @@ html, body {
 
       <div class="visual-wrap">
         {% if image_uri %}
-          <img class="shot" src="{{ image_uri }}" alt="{{ item.title }}" />
+          {% if item.frame and item.frame.value == 'browser' %}
+            <div class="frame-window">
+              <div class="frame-bar">
+                <div class="frame-dots">
+                  <span class="fdot fdot-r"></span>
+                  <span class="fdot fdot-y"></span>
+                  <span class="fdot fdot-g"></span>
+                </div>
+                <div class="frame-url-pill">🔒 {{ item.url or item.eyebrow or item.title }}</div>
+                <div style="width: 36px;"></div>
+              </div>
+              <img class="shot in-frame" src="{{ image_uri }}" alt="{{ item.title }}" />
+            </div>
+          {% elif item.frame and item.frame.value == 'macos' %}
+            <div class="frame-window">
+              <div class="frame-bar">
+                <div class="frame-dots">
+                  <span class="fdot fdot-r"></span>
+                  <span class="fdot fdot-y"></span>
+                  <span class="fdot fdot-g"></span>
+                </div>
+                <div class="frame-title">{{ item.title }}</div>
+                <div style="width: 36px;"></div>
+              </div>
+              <img class="shot in-frame" src="{{ image_uri }}" alt="{{ item.title }}" />
+            </div>
+          {% else %}
+            <img class="shot" src="{{ image_uri }}" alt="{{ item.title }}" />
+          {% endif %}
         {% else %}
           <div class="shot-placeholder">
             <div class="shot-placeholder-title">{{ item.title }}</div>

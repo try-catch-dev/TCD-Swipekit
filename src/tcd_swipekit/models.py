@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from enum import Enum
-from typing import Literal
+from typing import Any, Literal
 
 from pydantic import BaseModel, Field, model_validator
 
@@ -63,15 +63,24 @@ class WatermarkPosition(str, Enum):
 
 
 class SlideLayout(str, Enum):
-    """Visual layout variant for content slides."""
+    """Built-in visual layout variants for content slides (custom string names also supported)."""
 
-    SHOWCASE = "showcase"  # Hero screenshot / repo / website card (default)
-    CODE = "code"          # Syntax-highlighted code snippet or terminal diff card
-    VERSUS = "versus"      # Side-by-side or stacked A-vs-B comparison card
+    SHOWCASE = "showcase"    # Hero screenshot / repo / website card (default)
+    CODE = "code"            # Syntax-highlighted code snippet or terminal diff card
+    VERSUS = "versus"        # Side-by-side or stacked A-vs-B comparison card
+    CHECKLIST = "checklist"  # Actionable checklist, roadmap, or step-by-step card
+
+
+class FrameStyle(str, Enum):
+    """Optional device/window mockup frame around `showcase` screenshots."""
+
+    NONE = "none"
+    BROWSER = "browser"
+    MACOS = "macos"
 
 
 class SlideBadge(BaseModel):
-    """Metadata pill shown beneath the hero screenshot."""
+    """Metadata pill shown beneath the hero visual."""
 
     text: str
     style: BadgeStyle = BadgeStyle.GLASS
@@ -105,6 +114,45 @@ class VersusBlock(BaseModel):
     left: VersusSide
     right: VersusSide
     verdict: str | None = None
+
+
+class ChecklistEntry(BaseModel):
+    """Single row inside a `layout: checklist` slide."""
+
+    title: str
+    detail: str = ""
+    badge: str | None = None
+    checked: bool = True
+    accent: bool = False
+
+    @model_validator(mode="before")
+    @classmethod
+    def _coerce_string_entry(cls, value: Any) -> Any:
+        if isinstance(value, str):
+            text = value.strip()
+            if " — " in text:
+                head, tail = text.split(" — ", 1)
+                return {"title": head.strip(), "detail": tail.strip()}
+            if ": " in text and len(text.split(": ", 1)[0]) <= 36:
+                head, tail = text.split(": ", 1)
+                return {"title": head.strip(), "detail": tail.strip()}
+            return {"title": text}
+        return value
+
+
+class ChecklistBlock(BaseModel):
+    """Structured checklist, roadmap, or key-takeaways block (`layout: checklist`)."""
+
+    items: list[ChecklistEntry] = Field(default_factory=list)
+    numbered: bool = False
+    summary: str | None = None
+
+    @model_validator(mode="before")
+    @classmethod
+    def _coerce_list_shorthand(cls, value: Any) -> Any:
+        if isinstance(value, list):
+            return {"items": value}
+        return value
 
 
 class CoverConfig(BaseModel):
@@ -149,15 +197,17 @@ class ThemeConfig(BaseModel):
     ambient_brightness: float = 0.34
     ambient_saturation: float = 1.45
     card_radius: int = 24
+    show_progress: bool = True
     watermark: str | None = None
     watermark_position: WatermarkPosition = WatermarkPosition.BOTTOM_RIGHT
 
 
 class SlideItem(BaseModel):
-    """Unified schema for a single content slide (GitHub, Website, Code, Versus, or Manual)."""
+    """Unified schema for a single content slide (supports built-in and custom plugin layouts)."""
 
-    source: Literal["github", "website", "manual"] = "manual"
-    layout: SlideLayout = SlideLayout.SHOWCASE
+    source: str = "manual"
+    layout: SlideLayout | str = SlideLayout.SHOWCASE
+    frame: FrameStyle = FrameStyle.NONE
     eyebrow: str = ""
     title: str
     description: str = ""
@@ -173,14 +223,26 @@ class SlideItem(BaseModel):
     repo: str | None = None
     code_block: CodeBlock | None = None
     versus: VersusBlock | None = None
+    checklist: ChecklistBlock | None = None
+    custom_template: str | None = None
+    extra: dict[str, Any] = Field(default_factory=dict)
 
     @model_validator(mode="after")
     def _infer_layout_from_content(self) -> SlideItem:
+        # Normalize known enum strings to SlideLayout enum members
+        if isinstance(self.layout, str) and not isinstance(self.layout, SlideLayout):
+            for member in SlideLayout:
+                if self.layout == member.value:
+                    self.layout = member
+                    break
+
         if self.layout == SlideLayout.SHOWCASE:
             if self.code_block is not None:
                 self.layout = SlideLayout.CODE
             elif self.versus is not None:
                 self.layout = SlideLayout.VERSUS
+            elif self.checklist is not None:
+                self.layout = SlideLayout.CHECKLIST
         return self
 
 
@@ -219,6 +281,7 @@ class CreatorProfile(BaseModel):
     cover_image: str | None = None
     outro: OutroConfig | None = None
     export_pdf: bool | None = None
+    export_gif: bool | None = None
     hashtags: list[str] | None = None
 
 
@@ -250,6 +313,7 @@ class SiteEntry(BaseModel):
     footnote: str | None = None
     footnote_accent: bool = False
     screenshot_path: str | None = None
+    frame: FrameStyle = FrameStyle.BROWSER
     dark_mode: bool = False
     wait_ms: int = 1200
 
