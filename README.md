@@ -146,14 +146,47 @@ Run `swipekit themes` to list all installed presets.
 
 ## Quick Start
 
-### 1. Install
+### 1. Install & Run
+
+Clone the repository first:
 
 ```bash
 git clone https://github.com/try-catch-dev/TCD-Swipekit.git
 cd TCD-Swipekit
+```
 
+#### Option A — Using `uv` *(Recommended — Fast & Isolated)*
+
+```bash
+# Create virtual environment & install dependencies with uv
+uv venv
+source .venv/bin/activate        # Windows: .venv\Scripts\activate
+uv pip install -e ".[dev]"
+playwright install chromium
+swipekit doctor
+
+# Or run commands directly via `uv run` without manually activating the venv:
+uv run playwright install chromium
+uv run swipekit doctor
+uv run swipekit render examples/code_and_versus_deck.yaml --theme editorial-light --pdf
+```
+
+*(You can also install `swipekit` globally as a standalone CLI tool via `uv tool install git+https://github.com/try-catch-dev/TCD-Swipekit.git`.)*
+
+#### Option B — Using Standard Python Virtual Environment (`venv` + `pip`)
+
+```bash
+# 1. Create and activate a virtual environment
+python3 -m venv .venv
+source .venv/bin/activate        # Windows (PowerShell): .venv\Scripts\Activate.ps1
+                                 # Windows (CMD):        .venv\Scripts\activate.bat
+
+# 2. Install TCD-Swipekit and Playwright Chromium
+pip install --upgrade pip
 pip install -e ".[dev]"
 playwright install chromium
+
+# 3. Verify your setup
 swipekit doctor
 ```
 

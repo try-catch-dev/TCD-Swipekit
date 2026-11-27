@@ -6,13 +6,29 @@ Thank you for your interest in contributing to **TCD-Swipekit**! Whether you are
 
 ## Development Setup
 
+### Option A — Using `uv` (Recommended)
+
 ```bash
 git clone https://github.com/try-catch-dev/TCD-Swipekit.git
 cd TCD-Swipekit
 
-python -m venv .venv
+uv venv
+source .venv/bin/activate        # Windows: .venv\Scripts\activate
+uv pip install -e ".[dev]"
+playwright install chromium
+swipekit doctor
+```
+
+### Option B — Using Python `venv` + `pip`
+
+```bash
+git clone https://github.com/try-catch-dev/TCD-Swipekit.git
+cd TCD-Swipekit
+
+python3 -m venv .venv
 source .venv/bin/activate        # Windows: .venv\Scripts\activate
 
+pip install --upgrade pip
 pip install -e ".[dev]"
 playwright install chromium
 swipekit doctor
@@ -27,6 +43,8 @@ Before opening a pull request, make sure linting and tests pass cleanly:
 ```bash
 ruff check src tests
 pytest -v
+# Or with uv:
+# uv run ruff check src tests && uv run pytest -v
 ```
 
 ---
